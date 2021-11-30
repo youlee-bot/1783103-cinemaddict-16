@@ -11,26 +11,30 @@ import { createExtraTemplate } from './view/site-extra-view';
 const ITEMS_COUNTER = 5;
 const EXTRA_COUNTER = 2;
 
-const mainTag = document.querySelector('.main');
 const headerTag = document.querySelector('.header');
-const footerTag = document.querySelector('.footer__statistics');
-
-mainTag.innerHTML = ('<div class="films-list__container"></div>');
 renderTemplate (headerTag, createUserRatingTemplate(), RenderPosition.BEFOREEND);
+
+const mainTag = document.querySelector('.main');
+
+mainTag.innerHTML = ('<section class="films"><section class="films-list"><h2 class="films-list__title visually-hidden">All movies. Upcoming</h2><div class="films-list__container"></div></section></section>');
+
+renderTemplate (mainTag, createSortTemplate(), RenderPosition.AFTERBEGIN);
 renderTemplate (mainTag, createSiteMenuTemplate(), RenderPosition.AFTERBEGIN );
 
-const filmListContainer = mainTag.querySelector('.films-list__container');
-renderTemplate (filmListContainer, createSortTemplate(), RenderPosition.BEFOREBEGIN);
 
+const filmListSection = mainTag.querySelector('.films');
+
+const filmListContainer = mainTag.querySelector('.films-list__container');
 for (let i = 0; i < ITEMS_COUNTER; i++) {
   renderTemplate (filmListContainer, createItemTemplate(), RenderPosition.BEFOREEND);
 }
 
+renderTemplate (filmListContainer, createShowMoreButtonTemplate(), RenderPosition.AFTEREND);
+
 for (let i = 0; i < EXTRA_COUNTER; i++) {
-  renderTemplate (filmListContainer, createExtraTemplate(), RenderPosition.BEFOREEND);
+  renderTemplate (filmListSection, createExtraTemplate(), RenderPosition.BEFOREEND);
 }
 
-renderTemplate (mainTag, createShowMoreButtonTemplate(), RenderPosition.BEFOREEND);
+const footerTag = document.querySelector('.footer__statistics');
 renderTemplate (footerTag, createMoviesCounterTemplate(), RenderPosition.BEFOREEND)
-renderTemplate (footerTag, createPopupTemplate(), RenderPosition.AFTEREND)
-
+renderTemplate (footerTag, createPopupTemplate(0), RenderPosition.AFTEREND)
