@@ -36,5 +36,5 @@ for (let i = 0; i < EXTRA_COUNTER; i++) {
 }
 
 const footerTag = document.querySelector('.footer__statistics');
-renderTemplate (footerTag, createMoviesCounterTemplate(), RenderPosition.BEFOREEND)
-renderTemplate (footerTag, createPopupTemplate(0), RenderPosition.AFTEREND)
+renderTemplate (footerTag, createMoviesCounterTemplate(), RenderPosition.BEFOREEND);
+renderTemplate (footerTag, createPopupTemplate(0), RenderPosition.AFTEREND);
