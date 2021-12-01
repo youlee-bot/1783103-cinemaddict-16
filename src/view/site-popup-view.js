@@ -1,7 +1,5 @@
 import { readyComments, readyContent } from '../main';
 import { minsToHours } from '../mock/utils';
-import { renderTemplate } from '../render';
-import { RenderPosition } from '../render';
 import dayjs from 'dayjs';
 import { genresWrapSpan } from '../mock/utils';
 import { createCommentTemplate } from './site-comment-view';
@@ -10,7 +8,7 @@ export const createPopupTemplate = (movieId) => {
 
   const showComments = (movie) => {
     let movieComments = '';
-    for (let index of readyComments) {
+    for (const index of readyComments) {
       if (index.movieId===movie) {
         movieComments += createCommentTemplate(index);
       }
@@ -135,4 +133,4 @@ export const createPopupTemplate = (movieId) => {
     </div>
   </form>
   </section>`);
-}
+};

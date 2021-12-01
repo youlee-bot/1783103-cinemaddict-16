@@ -1,6 +1,6 @@
-import { readyContent } from "../main";
+import { readyContent } from '../main';
 import dayjs from 'dayjs';
-import { minsToHours } from "../mock/utils";
+import { minsToHours } from '../mock/utils';
 
 export const createItemTemplate = (movieId) => (`<article class="film-card">
 <a class="film-card__link">
