@@ -1,4 +1,5 @@
 import { readyContent } from '../main';
+import { genresWrapSpan } from '../site-utils';
 import dayjs from 'dayjs';
 import { minsToHours } from '../mock/utils';
 
@@ -9,7 +10,7 @@ export const createItemTemplate = (movieId) => (`<article class="film-card">
   <p class="film-card__info">
     <span class="film-card__year">${ dayjs(readyContent[movieId].release.date).format('YYYY') }</span>
     <span class="film-card__duration">${ minsToHours(readyContent[movieId].runtime) }</span>
-    <span class="film-card__genre">${ readyContent[movieId].genre }</span>
+    <span class="film-card__genre">${ genresWrapSpan(readyContent[movieId].genre) }</span>
   </p>
   <img src="./${ readyContent[movieId].poster }" alt="" class="film-card__poster">
   <p class="film-card__description">${ readyContent[movieId].description }</p>
@@ -21,7 +22,3 @@ export const createItemTemplate = (movieId) => (`<article class="film-card">
   <button class="film-card__controls-item film-card__controls-item--favorite" type="button">Mark as favorite</button>
 </div>
 </article>`);
-
-
-//readyContent[movieId].release показать только год
-//${ readyContent[movieId].runtime } 1h 1m

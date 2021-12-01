@@ -1,7 +1,7 @@
 import { readyComments, readyContent } from '../main';
 import { minsToHours } from '../mock/utils';
 import dayjs from 'dayjs';
-import { genresWrapSpan } from '../mock/utils';
+import { genresWrapSpan } from '../site-utils';
 import { createCommentTemplate } from './site-comment-view';
 
 export const createPopupTemplate = (movieId) => {
