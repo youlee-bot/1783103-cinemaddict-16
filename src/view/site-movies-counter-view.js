@@ -1,3 +1,1 @@
-import { readyContent } from '../main';
-
-export const createMoviesCounterTemplate = () => (`<p>${ readyContent.length } movies inside</p>`);
+export const createMoviesCounterTemplate = (content) => (`<p>${ content } movies inside</p>`);

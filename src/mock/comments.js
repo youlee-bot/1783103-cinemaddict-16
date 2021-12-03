@@ -1,8 +1,5 @@
 import { LIST_OF_EMOTIONS, LIST_OF_NAMES, DESCRIPTIONS } from './constants';
-import { generateRandomUniqueArray } from './utils';
-import { getRandomInteger } from './utils';
-import { gerenerateElement } from './utils';
-import { generateDate } from './utils';
+import { generateRandomUniqueArray, getRandomInteger, gerenerateElement, generateDate } from './utils';
 
 export const generateComment = (id) => (
   {

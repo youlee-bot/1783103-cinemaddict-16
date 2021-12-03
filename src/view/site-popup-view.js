@@ -1,4 +1,4 @@
-import { readyComments, readyContent } from '../main';
+import { readyComments, readyContent } from '../mock/generator';
 import { minsToHours } from '../mock/utils';
 import dayjs from 'dayjs';
 import { genresWrapSpan } from '../site-utils';
