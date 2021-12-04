@@ -7,9 +7,13 @@ import { createShowMoreButtonTemplate } from './view/site-show-more-button-view'
 import { createMoviesCounterTemplate } from './view/site-movies-counter-view';
 import { createPopupTemplate } from './view/site-popup-view';
 import { createExtraTemplate } from './view/site-extra-view';
+import { readyContent } from './mock/generator';
 
-const ITEMS_COUNTER = 5;
+const MOVIES_TO_SHOW = 5;
+const MOVIES_TO_SHOW_PER_STEP = 5;
 const EXTRA_COUNTER = 2;
+
+let displayedMovieCards = 0;
 
 const headerTag = document.querySelector('.header');
 renderTemplate (headerTag, createUserRatingTemplate(), RenderPosition.BEFOREEND);
@@ -25,16 +29,38 @@ renderTemplate (mainTag, createSiteMenuTemplate(), RenderPosition.AFTERBEGIN );
 const filmListSection = mainTag.querySelector('.films');
 
 const filmListContainer = mainTag.querySelector('.films-list__container');
-for (let i = 0; i < ITEMS_COUNTER; i++) {
-  renderTemplate (filmListContainer, createItemTemplate(), RenderPosition.BEFOREEND);
-}
+const showMovieCard = (start, end) => {
+  for (let i = start; i < end; i++) {
+    renderTemplate (filmListContainer, createItemTemplate(readyContent[i]), RenderPosition.BEFOREEND);
+    displayedMovieCards++;
+  }
+};
+showMovieCard(0, MOVIES_TO_SHOW);
 
 renderTemplate (filmListContainer, createShowMoreButtonTemplate(), RenderPosition.AFTEREND);
 
 for (let i = 0; i < EXTRA_COUNTER; i++) {
-  renderTemplate (filmListSection, createExtraTemplate(), RenderPosition.BEFOREEND);
+  renderTemplate (filmListSection, createExtraTemplate(readyContent[i]), RenderPosition.BEFOREEND);
 }
 
 const footerTag = document.querySelector('.footer__statistics');
-renderTemplate (footerTag, createMoviesCounterTemplate(), RenderPosition.BEFOREEND);
-renderTemplate (footerTag, createPopupTemplate(0), RenderPosition.AFTEREND);
+renderTemplate (footerTag, createMoviesCounterTemplate(readyContent.length), RenderPosition.BEFOREEND);
+renderTemplate (footerTag, createPopupTemplate(readyContent[0]), RenderPosition.AFTEREND);
+
+const showMoreButton = document.querySelector('.films-list__show-more');
+
+const onShowMoreButtonClick = (evt) => {
+  evt.preventDefault();
+  if (readyContent.length > displayedMovieCards) {
+    const hidedMovieCards = readyContent.length - displayedMovieCards;
+    if (hidedMovieCards >= MOVIES_TO_SHOW_PER_STEP) {
+      showMovieCard(displayedMovieCards - 1, displayedMovieCards-1 + MOVIES_TO_SHOW_PER_STEP);
+    }
+    if (hidedMovieCards < MOVIES_TO_SHOW_PER_STEP) {
+      showMovieCard(displayedMovieCards - 1, readyContent.length - 1);
+      document.querySelector('.films-list__show-more').remove();
+    }
+  }
+};
+
+showMoreButton.addEventListener('click', onShowMoreButtonClick);
