@@ -1,20 +1,9 @@
-import { readyComments } from '../mock/generator';
 import { minsToHours } from '../mock/utils';
 import dayjs from 'dayjs';
 import { genresWrapSpan } from '../site-utils';
-import { createCommentTemplate } from './site-comment-view';
+import { showComments } from '../site-utils';
 
 export const createPopupTemplate = (movieToShow) => {
-
-  const showComments = (movie) => {
-    let movieComments = '';
-    for (const index of readyComments) {
-      if (index.movieId===movie) {
-        movieComments += createCommentTemplate(index);
-      }
-    }
-    return movieComments;
-  };
 
   const genreCounter = () => {
     if (movieToShow.genre.length > 1) {
