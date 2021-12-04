@@ -1,10 +1,10 @@
-import { readyComments, readyContent } from '../mock/generator';
+import { readyComments } from '../mock/generator';
 import { minsToHours } from '../mock/utils';
 import dayjs from 'dayjs';
 import { genresWrapSpan } from '../site-utils';
 import { createCommentTemplate } from './site-comment-view';
 
-export const createPopupTemplate = (movieId) => {
+export const createPopupTemplate = (movieToShow) => {
 
   const showComments = (movie) => {
     let movieComments = '';
@@ -17,7 +17,7 @@ export const createPopupTemplate = (movieId) => {
   };
 
   const genreCounter = () => {
-    if (readyContent[movieId].genre.length > 1) {
+    if (movieToShow.genre.length > 1) {
       return ('s');
     } else {
       return ('');
@@ -32,56 +32,56 @@ export const createPopupTemplate = (movieId) => {
       </div>
       <div class="film-details__info-wrap">
         <div class="film-details__poster">
-          <img class="film-details__poster-img" src="./${ readyContent[movieId].poster }" alt="">
+          <img class="film-details__poster-img" src="./${ movieToShow.poster }" alt="">
 
-          <p class="film-details__age">${ readyContent[movieId].ageRating }+</p>
+          <p class="film-details__age">${ movieToShow.ageRating }+</p>
         </div>
 
         <div class="film-details__info">
           <div class="film-details__info-head">
             <div class="film-details__title-wrap">
-              <h3 class="film-details__title">${ readyContent[movieId].title }</h3>
-              <p class="film-details__title-original">${ readyContent[movieId].alternativeTitle }</p>
+              <h3 class="film-details__title">${ movieToShow.title }</h3>
+              <p class="film-details__title-original">${ movieToShow.alternativeTitle }</p>
             </div>
 
             <div class="film-details__rating">
-              <p class="film-details__total-rating">${ readyContent[movieId].totalRating }</p>
+              <p class="film-details__total-rating">${ movieToShow.totalRating }</p>
             </div>
           </div>
 
           <table class="film-details__table">
             <tr class="film-details__row">
               <td class="film-details__term">Director</td>
-              <td class="film-details__cell">${ readyContent[movieId].director }</td>
+              <td class="film-details__cell">${ movieToShow.director }</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Writers</td>
-              <td class="film-details__cell">${ readyContent[movieId].writers }</td>
+              <td class="film-details__cell">${ movieToShow.writers }</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Actors</td>
-              <td class="film-details__cell">${ readyContent[movieId].actors }</td>
+              <td class="film-details__cell">${ movieToShow.actors }</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Release Date</td>
-              <td class="film-details__cell">${ dayjs(readyContent[movieId].release.date).format('DD MMMM YYYY') }</td>
+              <td class="film-details__cell">${ dayjs(movieToShow.release.date).format('DD MMMM YYYY') }</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Runtime</td>
-              <td class="film-details__cell">${ minsToHours(readyContent[movieId].runtime) }</td>
+              <td class="film-details__cell">${ minsToHours(movieToShow.runtime) }</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Country</td>
-              <td class="film-details__cell">${ readyContent[movieId].release.releaseCountry }</td>
+              <td class="film-details__cell">${ movieToShow.release.releaseCountry }</td>
             </tr>
             <tr class="film-details__row">
               <td class="film-details__term">Genre${ genreCounter() }</td>
               <td class="film-details__cell">
-              ${ genresWrapSpan(readyContent[movieId].genre) }</td>
+              ${ genresWrapSpan(movieToShow.genre) }</td>
             </tr>
           </table>
 
-          <p class="film-details__film-description">${ readyContent[movieId].description }</p>
+          <p class="film-details__film-description">${ movieToShow.description }</p>
         </div>
       </div>
 
@@ -94,10 +94,10 @@ export const createPopupTemplate = (movieId) => {
 
     <div class="film-details__bottom-container">
       <section class="film-details__comments-wrap">
-        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${ readyContent[movieId].comments }</span></h3>
+        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${ movieToShow.comments }</span></h3>
 
         <ul class="film-details__comments-list">
-          ${ showComments(movieId) }
+          ${ showComments(movieToShow.id) }
         </ul>
 
         <div class="film-details__new-comment">
