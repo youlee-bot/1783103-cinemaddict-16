@@ -1,6 +1,3 @@
-import { readyComments } from './mock/generator';
-import { createCommentTemplate } from './view/site-comment-view';
-
 //оборачивает жанры в тег span
 export const genresWrapSpan = (content) => {
   let wrappedGenres = '';
@@ -10,14 +7,4 @@ export const genresWrapSpan = (content) => {
     }
   }
   return wrappedGenres;
-};
-
-export const showComments = (movie) => {
-  let movieComments = '';
-  for (const index of readyComments) {
-    if (index.movieId===movie) {
-      movieComments += createCommentTemplate(index);
-    }
-  }
-  return movieComments;
 };
