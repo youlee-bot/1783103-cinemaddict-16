@@ -1,9 +1,20 @@
 import { minsToHours } from '../mock/utils';
 import dayjs from 'dayjs';
 import { genresWrapSpan } from '../site-utils';
-import { showComments } from '../site-utils';
+import CommentView from './site-comment-view';
+import { createElement } from '../render';
 
-export const createPopupTemplate = (movieToShow) => {
+
+const createPopupTemplate = (movieToShow, comments) => {
+
+  const showComments = () => {
+    let movieComments = '';
+    comments.forEach((comment) => {
+      movieComments += (new CommentView(comment).element).outerHTML;
+    });
+
+    return movieComments;
+  };
 
   const genreCounter = () => {
     if (movieToShow.genre.length > 1) {
@@ -86,7 +97,7 @@ export const createPopupTemplate = (movieToShow) => {
         <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${ movieToShow.comments }</span></h3>
 
         <ul class="film-details__comments-list">
-          ${ showComments(movieToShow.id) }
+          ${ showComments(comments) }
         </ul>
 
         <div class="film-details__new-comment">
@@ -123,3 +134,39 @@ export const createPopupTemplate = (movieToShow) => {
   </form>
   </section>`);
 };
+
+export default class PopupView {
+  #element = null;
+  #movieToShow = null;
+  #comments = null;
+
+  constructor (movieToShow, comments) {
+    this.#movieToShow = movieToShow;
+    this.#comments = comments;
+  }
+
+  get element () {
+    if(!this.#element) {
+      this.#element = createElement(this.template);
+    }
+
+    return this.#element;
+  }
+
+  get comments () {
+    if(!this.#element) {
+      this.#comments = createElement(this.comments );
+    }
+
+    return this.#comments;
+  }
+
+  get template () {
+    return createPopupTemplate(this.#movieToShow, this.#comments);
+  }
+
+  removeElement () {
+    this.#element = null;
+  }
+
+}

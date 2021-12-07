@@ -1,9 +1,9 @@
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime);
+import { createElement } from '../render';
 
-
-export const createCommentTemplate = (content) => (`<li class="film-details__comment">
+const createCommentTemplate = (content) => (`<li class="film-details__comment">
 <span class="film-details__comment-emoji">
   <img src="./images/emoji/${ content.emotion }.png" width="55" height="55" alt="emoji-puke">
 </span>
@@ -16,3 +16,28 @@ export const createCommentTemplate = (content) => (`<li class="film-details__com
   </p>
 </div>
 </li>`);
+
+export default class CommentView {
+  #element = null;
+  #content = null;
+
+  constructor (content) {
+    this.#content = content;
+  }
+
+  get element () {
+    if(!this.#element) {
+      this.#element = createElement(this.template);
+    }
+
+    return this.#element;
+  }
+
+  get template () {
+    return createCommentTemplate(this.#content);
+  }
+
+  removeElement() {
+    this.#element = null;
+  }
+}

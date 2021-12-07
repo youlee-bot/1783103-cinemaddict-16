@@ -1,8 +1,9 @@
 import { genresWrapSpan } from '../site-utils';
 import dayjs from 'dayjs';
 import { minsToHours } from '../mock/utils';
+import { createElement } from '../render';
 
-export const createItemTemplate = (movie) =>  (`<article class="film-card">
+const createItemTemplate = (movie) =>  (`<article class="film-card" data-movie-index="${ movie.id }">
   <a class="film-card__link">
     <h3 class="film-card__title">${ movie.title }</h3>
     <p class="film-card__rating">${ movie.totalRating }</p>
@@ -21,3 +22,29 @@ export const createItemTemplate = (movie) =>  (`<article class="film-card">
     <button class="film-card__controls-item film-card__controls-item--favorite" type="button">Mark as favorite</button>
   </div>
   </article>`);
+
+export default class ItemView {
+  #element = null;
+  #movie = null;
+
+  constructor (movie) {
+    this.#movie = movie;
+  }
+
+  get element () {
+    if (!this.#element) {
+      this.#element = createElement(this.template);
+
+    }
+    return this.#element;
+  }
+
+  get template () {
+    return createItemTemplate(this.#movie);
+  }
+
+  removeElement () {
+    this.#element = null;
+  }
+
+}
