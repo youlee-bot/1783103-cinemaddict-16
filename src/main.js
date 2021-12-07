@@ -6,7 +6,6 @@ import SortView from './view/site-sort-view';
 import ButtonView from './view/site-show-more-button-view';
 import MoviesView from './view/site-movies-counter-view';
 import PopupView from './view/site-popup-view';
-//import { createExtraTemplate } from './view/site-extra-view';
 import { readyComments, readyContent } from './mock/generator';
 import ExtraView from './view/site-extra-view';
 

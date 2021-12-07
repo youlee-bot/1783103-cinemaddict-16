@@ -9,8 +9,8 @@ const createPopupTemplate = (movieToShow, comments) => {
 
   const showComments = () => {
     let movieComments = '';
-    comments.forEach((index) => {
-      movieComments += (new CommentView(index).element).outerHTML;
+    comments.forEach((comment) => {
+      movieComments += (new CommentView(comment).element).outerHTML;
     });
 
     return movieComments;
