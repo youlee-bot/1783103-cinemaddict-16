@@ -1,7 +1,7 @@
 import { genresWrapSpan } from '../site-utils';
 import dayjs from 'dayjs';
 import { minsToHours } from '../mock/utils';
-import { createElement } from '../render';
+import AbstractView from './abstract-view';
 
 const createItemTemplate = (movie) =>  (`<article class="film-card" data-movie-index="${ movie.id }">
   <a class="film-card__link">
@@ -23,28 +23,25 @@ const createItemTemplate = (movie) =>  (`<article class="film-card" data-movie-i
   </div>
   </article>`);
 
-export default class ItemView {
-  #element = null;
-  #movie = null;
+export default class ItemView extends AbstractView{
+  movie = null;
 
   constructor (movie) {
-    this.#movie = movie;
-  }
-
-  get element () {
-    if (!this.#element) {
-      this.#element = createElement(this.template);
-
-    }
-    return this.#element;
+    super();
+    this.movie = movie;
   }
 
   get template () {
-    return createItemTemplate(this.#movie);
+    return createItemTemplate(this.movie);
   }
 
-  removeElement () {
-    this.#element = null;
+  setClickHandler = (callback) => {
+    this._callback.click = callback;
+    this.element.addEventListener('click', this.#clickHandler);
   }
 
+  #clickHandler = (evt) => {
+    evt.preventDefault();
+    this._callback.click();
+  }
 }

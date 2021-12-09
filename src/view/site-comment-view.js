@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime);
-import { createElement } from '../render';
+import AbstractView from './abstract-view';
 
 const createCommentTemplate = (content) => (`<li class="film-details__comment">
 <span class="film-details__comment-emoji">
@@ -17,27 +17,15 @@ const createCommentTemplate = (content) => (`<li class="film-details__comment">
 </div>
 </li>`);
 
-export default class CommentView {
-  #element = null;
+export default class CommentView extends AbstractView{
   #content = null;
 
   constructor (content) {
+    super();
     this.#content = content;
-  }
-
-  get element () {
-    if(!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
   }
 
   get template () {
     return createCommentTemplate(this.#content);
-  }
-
-  removeElement() {
-    this.#element = null;
   }
 }

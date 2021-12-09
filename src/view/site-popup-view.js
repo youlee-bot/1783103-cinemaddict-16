@@ -2,7 +2,7 @@ import { minsToHours } from '../mock/utils';
 import dayjs from 'dayjs';
 import { genresWrapSpan } from '../site-utils';
 import CommentView from './site-comment-view';
-import { createElement } from '../render';
+import AbstractView from './abstract-view';
 
 
 const createPopupTemplate = (movieToShow, comments) => {
@@ -135,38 +135,17 @@ const createPopupTemplate = (movieToShow, comments) => {
   </section>`);
 };
 
-export default class PopupView {
-  #element = null;
+export default class PopupView extends AbstractView{
   #movieToShow = null;
   #comments = null;
 
   constructor (movieToShow, comments) {
+    super();
     this.#movieToShow = movieToShow;
     this.#comments = comments;
-  }
-
-  get element () {
-    if(!this.#element) {
-      this.#element = createElement(this.template);
-    }
-
-    return this.#element;
-  }
-
-  get comments () {
-    if(!this.#element) {
-      this.#comments = createElement(this.comments );
-    }
-
-    return this.#comments;
   }
 
   get template () {
     return createPopupTemplate(this.#movieToShow, this.#comments);
   }
-
-  removeElement () {
-    this.#element = null;
-  }
-
 }
