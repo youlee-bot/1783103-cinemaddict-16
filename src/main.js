@@ -1,4 +1,4 @@
-import { renderElement, RenderPosition } from './render';
+import { render, RenderPosition, remove } from './render';
 import SiteMenuView from './view/site-menu-view';
 import ItemView from './view/site-item-view';
 import RatingView from './view/site-user-rating-view';
@@ -18,13 +18,13 @@ let displayedMovieCards = 0;
 const MoreButton = new ButtonView();
 
 const headerTag = document.querySelector('.header');
-renderElement (headerTag, new RatingView().element, RenderPosition.BEFOREEND);
+render (headerTag, new RatingView(), RenderPosition.BEFOREEND);
 const bodyTag = document.querySelector('body');
 const mainTag = document.querySelector('.main');
 
-renderElement (mainTag, new BoardView().element, RenderPosition.AFTERBEGIN);
-renderElement (mainTag, new SortView().element, RenderPosition.AFTERBEGIN);
-renderElement (mainTag, new SiteMenuView().element, RenderPosition.AFTERBEGIN );
+render (mainTag, new BoardView(), RenderPosition.AFTERBEGIN);
+render (mainTag, new SortView(), RenderPosition.AFTERBEGIN);
+render (mainTag, new SiteMenuView(), RenderPosition.AFTERBEGIN );
 
 
 const filmListSection = mainTag.querySelector('.films');
@@ -33,7 +33,7 @@ const filmListContainer = mainTag.querySelector('.films-list__container');
 const showMovieCard = (start, end) => {
   for (let i = start; i < end; i++) {
     const currentMovie = new ItemView(readyContent[i]);
-    renderElement (filmListContainer, currentMovie.element, RenderPosition.BEFOREEND);
+    render (filmListContainer, currentMovie, RenderPosition.BEFOREEND);
     currentMovie.setClickHandler(()=>{
 
       const prepareComments = (movieId) => {
@@ -78,15 +78,15 @@ const showMovieCard = (start, end) => {
 };
 showMovieCard(0, MOVIES_TO_SHOW);
 
-renderElement (filmListContainer, MoreButton.element, RenderPosition.AFTEREND);
+render (filmListContainer, MoreButton, RenderPosition.AFTEREND);
 
 
 for (let i = 0; i < EXTRA_COUNTER; i++) {
-  renderElement (filmListSection, new ExtraView(readyContent[i]).element, RenderPosition.BEFOREEND);
+  render (filmListSection, new ExtraView(readyContent[i]), RenderPosition.BEFOREEND);
 }
 
 const footerTag = document.querySelector('.footer__statistics');
-renderElement (footerTag, new MoviesView(readyContent.length).element, RenderPosition.BEFOREEND);
+render (footerTag, new MoviesView(readyContent.length), RenderPosition.BEFOREEND);
 
 
 MoreButton.setClickHandler(()=>{
@@ -97,7 +97,7 @@ MoreButton.setClickHandler(()=>{
     }
     if (hidedMovieCards < MOVIES_TO_SHOW_PER_STEP) {
       showMovieCard(displayedMovieCards - 1, readyContent.length - 1);
-      document.querySelector('.films-list__show-more').remove();
+      remove(MoreButton);
     }
   }
 });
