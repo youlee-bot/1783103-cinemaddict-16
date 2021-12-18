@@ -18,7 +18,7 @@ const createItemTemplate = (movie) =>  (`<article class="film-card" data-movie-i
   </a>
   <div class="film-card__controls">
     <button class="film-card__controls-item film-card__controls-item--add-to-watchlist" type="button">Add to watchlist</button>
-    <button class="film-card__controls-item film-card__controls-item--mark-as-watched film-card__controls-item--active" type="button">Mark as watched</button>
+    <button class="film-card__controls-item film-card__controls-item--mark-as-watched" type="button">Mark as watched</button>
     <button class="film-card__controls-item film-card__controls-item--favorite" type="button">Mark as favorite</button>
   </div>
   </article>`);
@@ -35,13 +35,40 @@ export default class ItemView extends AbstractView{
     return createItemTemplate(this.movie);
   }
 
-  setClickHandler = (callback) => {
+  setClickCallback = (callback) => {
     this._callback.click = callback;
+  }
+
+  setWatchlistCallback = (callback) => {
+    this._callback.watchlist = callback;
+  }
+
+  setWatchCallback = (callback) => {
+    this._callback.watch = callback;
+  }
+
+  setFavoriteCallback = (callback) => {
+    this._callback.favorite = callback;
+  }
+
+  setClickHandler = () => {
     this.element.addEventListener('click', this.#clickHandler);
   }
 
   #clickHandler = (evt) => {
     evt.preventDefault();
-    this._callback.click();
+    const clickedElement = evt.target;
+    if(clickedElement.classList.contains ('film-card__controls-item--favorite')) {
+      this._callback.favorite();
+      clickedElement.classList.toggle('film-card__controls-item--active');
+    } else if (clickedElement.classList.contains ('film-card__controls-item--mark-as-watched')) {
+      this._callback.watch();
+      clickedElement.classList.toggle('film-card__controls-item--active');
+    } else if (clickedElement.classList.contains ('film-card__controls-item--add-to-watchlist')) {
+      this._callback.watchlist();
+      clickedElement.classList.toggle('film-card__controls-item--active');
+    } else {
+      this._callback.click();
+    }
   }
 }
