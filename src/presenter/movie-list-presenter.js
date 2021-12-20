@@ -1,20 +1,16 @@
 import BoardView from '../view/site-board-view';
 import SortView from '../view/site-sort-view';
 import SiteMenuView from '../view/site-menu-view';
-import ItemView from '../view/site-item-view';
 import ButtonView from '../view/site-show-more-button-view';
 import ExtraView from '../view/site-extra-view';
 import MoviesView from '../view/site-movies-counter-view';
 import { render, RenderPosition, remove } from '../render';
-import PopupView from '../view/site-popup-view';
 import RatingView from '../view/site-user-rating-view';
+import SingleMoviePresenter from './single-movie-presenter';
 
 export default class MovieListPresenter {
   #boardContainer = null;
   #filmListContainer = null;
-  #bodyTag = null;
-  #popupClassInstance = null;
-  #commentsForClickedMovie = null;
   #filmListTag = null;
 
   #boardComponent =  new BoardView();
@@ -31,7 +27,6 @@ export default class MovieListPresenter {
 
   constructor (movieList) {
     this.#boardContainer = movieList;
-    this.#bodyTag = document.querySelector('body');
   }
 
   init = (movies, comments) => {
@@ -60,29 +55,8 @@ export default class MovieListPresenter {
   }
 
   #renderMovieitem = (movieItem) => {
-    const currentMovie = new ItemView(movieItem);
-    render (this.#filmListContainer, currentMovie, RenderPosition.BEFOREEND);
-    const idToShow = currentMovie.movie.id;
-
-
-    currentMovie.setClickCallback (()=>{
-      this.#prepareComments(idToShow);
-      this.#showPopup(this.#moviesToDisplay[idToShow], this.#commentsForClickedMovie);
-    });
-
-    currentMovie.setFavoriteCallback (()=>{
-      this.#moviesToDisplay[idToShow].userDetails.favorite = !this.#moviesToDisplay[idToShow].userDetails.favorite;
-    });
-
-    currentMovie.setWatchCallback (()=>{
-      this.#moviesToDisplay[idToShow].userDetails.alreadyWatched = !this.#moviesToDisplay[idToShow].userDetails.alreadyWatched;
-    });
-
-    currentMovie.setWatchlistCallback (()=>{
-      this.#moviesToDisplay[idToShow].userDetails.watchlist = !this.#moviesToDisplay[idToShow].userDetails.watchlist;
-    });
-
-    currentMovie.setClickHandler();
+    const MoviePresenter = new SingleMoviePresenter(this.#filmListContainer, movieItem, this.#prepareComments(movieItem.id));
+    MoviePresenter.init();
   }
 
   #prepareComments = (movieId) => {
@@ -92,48 +66,8 @@ export default class MovieListPresenter {
         movieComments.push(index);
       }
     }
-    this.#commentsForClickedMovie = movieComments;
+    return movieComments;
   }
-
-  #showPopup = (movieItem, comments) => {
-    const thisPopup = new PopupView(movieItem, comments);
-    const idToShow = thisPopup.movie.id;
-
-    thisPopup.setClickCallback (()=>{
-      this.#prepareComments(idToShow);
-      this.#showPopup(this.#moviesToDisplay[idToShow], this.#commentsForClickedMovie);
-    });
-
-    thisPopup.setFavoriteCallback (()=>{
-      this.#moviesToDisplay[idToShow].userDetails.favorite = !this.#moviesToDisplay[idToShow].userDetails.favorite;
-    });
-
-    thisPopup.setWatchCallback (()=>{
-      this.#moviesToDisplay[idToShow].userDetails.alreadyWatched = !this.#moviesToDisplay[idToShow].userDetails.alreadyWatched;
-    });
-
-    thisPopup.setWatchlistCallback (()=>{
-      this.#moviesToDisplay[idToShow].userDetails.watchlist = !this.#moviesToDisplay[idToShow].userDetails.watchlist;
-    });
-
-    thisPopup.setClickHandler();
-
-    const closePopup = () => {
-      const popupElement = document.querySelector('.film-details');
-      if (popupElement) {
-        this.#bodyTag.removeChild(thisPopup.element);
-        this.#bodyTag.classList.remove('hide-overflow');
-      }
-    };
-
-    closePopup();
-    this.#bodyTag.classList.add('hide-overflow');
-    this.#bodyTag.appendChild(thisPopup.element);
-
-    const closeButton = thisPopup.element.querySelector('.film-details__close-btn');
-    closeButton.addEventListener('click', () => closePopup());
-  }
-
 
   #renderRating = () => {
     const headerTag = document.querySelector('.header');
