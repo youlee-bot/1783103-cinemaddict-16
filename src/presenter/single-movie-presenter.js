@@ -24,7 +24,7 @@ export default class SingleMoviePresenter {
       this.#showPopup(this.#movie, this.#comments);
     });
 
-    controlsSetHandlers(currentMovie, this.#movie.id);
+    controlsSetHandlers(currentMovie, this.#movie);
     currentMovie.setClickHandler();
     this.#bodyTag = document.querySelector('body');
   }
@@ -32,7 +32,7 @@ export default class SingleMoviePresenter {
   #showPopup = (movieItem, comments) => {
     const thisPopup = new PopupView(movieItem, comments);
 
-    controlsSetHandlers(thisPopup, this.#movie.id);
+    controlsSetHandlers(thisPopup, this.#movie);
 
     thisPopup.setClickCallback (()=>{
     });
