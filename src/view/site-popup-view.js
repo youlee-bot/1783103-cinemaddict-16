@@ -15,21 +15,9 @@ const createPopupTemplate = (movieToShow, comments) => {
     return movieComments;
   };
 
-  const genreCounter = () => {
-    if (movieToShow.genre.length > 1) {
-      return ('s');
-    } else {
-      return ('');
-    }
-  };
+  const genreCounter = () => (movieToShow.genre.length > 1)?'s':'';
 
-  const activeButton = (status) => {
-    if (status) {
-      return ('film-details__control-button--active');
-    } else {
-      return ('');
-    }
-  };
+  const activeButton = (status) => (status)?'film-details__control-button--active':'';
 
   return (`<section class="film-details">
   <form class="film-details__inner" action="" method="get">
@@ -150,14 +138,20 @@ export default class PopupView extends AbstractView{
     super();
     this.#comments = comments;
     this.movie = movieToShow;
+    this.setClickHandler();
   }
 
   get template () {
     return createPopupTemplate(this.movie, this.#comments);
   }
 
-  setClickCallback = (callback) => {
-    this._callback.click = callback;
+  removeElement () {
+    const popupElement = document.querySelector('.film-details');
+    const bodyTag = document.querySelector('body');
+    if (popupElement) {
+      bodyTag.removeChild(this.element);
+      bodyTag.classList.remove('hide-overflow');
+    }
   }
 
   setWatchlistCallback = (callback) => {
@@ -172,6 +166,10 @@ export default class PopupView extends AbstractView{
     this._callback.favorite = callback;
   }
 
+  setCloseCallback = (callback) => {
+    this._callback.close = callback;
+  }
+
   setClickHandler = () => {
     this.element.addEventListener('click', this.#clickHandler);
   }
@@ -180,14 +178,17 @@ export default class PopupView extends AbstractView{
     evt.preventDefault();
     const clickedElement = evt.target;
     if(clickedElement.classList.contains ('film-details__control-button--favorite')) {
-      this._callback.favorite();
+      this._callback?.favorite();
       clickedElement.classList.toggle('film-details__control-button--active');
     } else if (clickedElement.classList.contains ('film-details__control-button--watched')) {
-      this._callback.watch();
+      this._callback?.watch();
       clickedElement.classList.toggle('film-details__control-button--active');
     } else if (clickedElement.classList.contains ('film-details__control-button--watchlist')) {
-      this._callback.watchlist();
+      this._callback?.watchlist();
       clickedElement.classList.toggle('film-details__control-button--active');
+    } else if (clickedElement.classList.contains ('film-details__close-btn')) {
+      this._callback?.close();
     }
   }
 }
+

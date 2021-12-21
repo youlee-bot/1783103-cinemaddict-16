@@ -30,28 +30,13 @@ export default class SingleMoviePresenter {
   }
 
   #showPopup = (movieItem, comments) => {
-    const thisPopup = new PopupView(movieItem, comments);
+    const currentPopup = new PopupView(movieItem, comments);
 
-    controlsSetHandlers(thisPopup, this.#movie);
+    controlsSetHandlers(currentPopup, this.#movie);
+    currentPopup.setCloseCallback(()=>currentPopup.removeElement());
+    currentPopup.removeElement();
 
-    thisPopup.setClickCallback (()=>{
-    });
-
-    thisPopup.setClickHandler();
-
-    const closePopup = () => {
-      const popupElement = document.querySelector('.film-details');
-      if (popupElement) {
-        this.#bodyTag.removeChild(thisPopup.element);
-        this.#bodyTag.classList.remove('hide-overflow');
-      }
-    };
-
-    closePopup();
     this.#bodyTag.classList.add('hide-overflow');
-    this.#bodyTag.appendChild(thisPopup.element);
-
-    const closeButton = thisPopup.element.querySelector('.film-details__close-btn');
-    closeButton.addEventListener('click', () => closePopup());
+    this.#bodyTag.appendChild(currentPopup.element);
   }
 }

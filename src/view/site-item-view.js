@@ -29,6 +29,7 @@ export default class ItemView extends AbstractView{
   constructor (movie) {
     super();
     this.movie = movie;
+    this.setClickHandler();
   }
 
   get template () {
