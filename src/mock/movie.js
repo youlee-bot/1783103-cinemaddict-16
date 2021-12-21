@@ -37,4 +37,9 @@ export const generateMovie = (id) => ({
   description: generateRandomUniqueArray(DESCRIPTIONS.split('.'), getRandomInteger(1, 5))
     .join('.'),
   comments: getRandomInteger(0, 5),
+  userDetails: {
+    watchlist: false,
+    alreadyWatched: false,
+    favorite: false,
+  }
 });

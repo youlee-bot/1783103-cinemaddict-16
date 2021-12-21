@@ -4,7 +4,6 @@ import { genresWrapSpan } from '../site-utils';
 import CommentView from './site-comment-view';
 import AbstractView from './abstract-view';
 
-
 const createPopupTemplate = (movieToShow, comments) => {
 
   const showComments = () => {
@@ -16,13 +15,9 @@ const createPopupTemplate = (movieToShow, comments) => {
     return movieComments;
   };
 
-  const genreCounter = () => {
-    if (movieToShow.genre.length > 1) {
-      return ('s');
-    } else {
-      return ('');
-    }
-  };
+  const genreCounter = () => (movieToShow.genre.length > 1)?'s':'';
+
+  const activeButton = (status) => (status)?'film-details__control-button--active':'';
 
   return (`<section class="film-details">
   <form class="film-details__inner" action="" method="get">
@@ -86,9 +81,9 @@ const createPopupTemplate = (movieToShow, comments) => {
       </div>
 
       <section class="film-details__controls">
-        <button type="button" class="film-details__control-button film-details__control-button--watchlist" id="watchlist" name="watchlist">Add to watchlist</button>
-        <button type="button" class="film-details__control-button film-details__control-button--active film-details__control-button--watched" id="watched" name="watched">Already watched</button>
-        <button type="button" class="film-details__control-button film-details__control-button--favorite" id="favorite" name="favorite">Add to favorites</button>
+        <button type="button" class="film-details__control-button ${ activeButton(movieToShow.userDetails.watchlist) } film-details__control-button--watchlist" id="watchlist" name="watchlist">Add to watchlist</button>
+        <button type="button" class="film-details__control-button ${ activeButton(movieToShow.userDetails.alreadyWatched) } film-details__control-button--watched" id="watched" name="watched">Already watched</button>
+        <button type="button" class="film-details__control-button ${ activeButton(movieToShow.userDetails.favorite) } film-details__control-button--favorite" id="favorite" name="favorite">Add to favorites</button>
       </section>
     </div>
 
@@ -136,16 +131,64 @@ const createPopupTemplate = (movieToShow, comments) => {
 };
 
 export default class PopupView extends AbstractView{
-  #movieToShow = null;
   #comments = null;
+  movie = null;
 
   constructor (movieToShow, comments) {
     super();
-    this.#movieToShow = movieToShow;
     this.#comments = comments;
+    this.movie = movieToShow;
+    this.setClickHandler();
   }
 
   get template () {
-    return createPopupTemplate(this.#movieToShow, this.#comments);
+    return createPopupTemplate(this.movie, this.#comments);
+  }
+
+  removeElement () {
+    const popupElement = document.querySelector('.film-details');
+    const bodyTag = document.querySelector('body');
+    if (popupElement) {
+      bodyTag.removeChild(this.element);
+      bodyTag.classList.remove('hide-overflow');
+    }
+  }
+
+  setWatchlistCallback = (callback) => {
+    this._callback.watchlist = callback;
+  }
+
+  setWatchCallback = (callback) => {
+    this._callback.watch = callback;
+  }
+
+  setFavoriteCallback = (callback) => {
+    this._callback.favorite = callback;
+  }
+
+  setCloseCallback = (callback) => {
+    this._callback.close = callback;
+  }
+
+  setClickHandler = () => {
+    this.element.addEventListener('click', this.#clickHandler);
+  }
+
+  #clickHandler = (evt) => {
+    evt.preventDefault();
+    const clickedElement = evt.target;
+    if(clickedElement.classList.contains ('film-details__control-button--favorite')) {
+      this._callback?.favorite();
+      clickedElement.classList.toggle('film-details__control-button--active');
+    } else if (clickedElement.classList.contains ('film-details__control-button--watched')) {
+      this._callback?.watch();
+      clickedElement.classList.toggle('film-details__control-button--active');
+    } else if (clickedElement.classList.contains ('film-details__control-button--watchlist')) {
+      this._callback?.watchlist();
+      clickedElement.classList.toggle('film-details__control-button--active');
+    } else if (clickedElement.classList.contains ('film-details__close-btn')) {
+      this._callback?.close();
+    }
   }
 }
+
