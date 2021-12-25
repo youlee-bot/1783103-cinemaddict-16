@@ -30,12 +30,14 @@ export default class SingleMoviePresenter {
   }
 
   #showPopup = (movieItem, comments) => {
+    if (document.querySelector('.film-details')) {
+      return;
+    }
+
     const currentPopup = new PopupView(movieItem, comments);
 
     controlsSetHandlers(currentPopup, this.#movie);
     currentPopup.setCloseCallback(()=>currentPopup.removeElement());
-    currentPopup.removeElement();
-
     this.#bodyTag.classList.add('hide-overflow');
     this.#bodyTag.appendChild(currentPopup.element);
   }

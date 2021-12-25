@@ -2,14 +2,16 @@ import { minsToHours } from '../mock/utils';
 import dayjs from 'dayjs';
 import { genresWrapSpan } from '../site-utils';
 import CommentView from './site-comment-view';
-import AbstractView from './abstract-view';
+import SmartView from './smart-view';
 
 const createPopupTemplate = (movieToShow, comments) => {
 
   const showComments = () => {
     let movieComments = '';
     comments.forEach((comment) => {
-      movieComments += (new CommentView(comment).element).outerHTML;
+      if (comment.movieId>=0) {
+        movieComments += (new CommentView(comment).element).outerHTML;
+      }
     });
 
     return movieComments;
@@ -18,6 +20,14 @@ const createPopupTemplate = (movieToShow, comments) => {
   const genreCounter = () => (movieToShow.genre.length > 1)?'s':'';
 
   const activeButton = (status) => (status)?'film-details__control-button--active':'';
+
+  const insertEmoji = () => {
+    const lastComment = comments[comments.length-1];
+    if (!lastComment.emotion) {
+      return '';
+    }
+    return `<img src="images/emoji/${ lastComment.emotion }.png" width="55" height="55" alt="emoji-${ lastComment.emotion }"></img>`;
+  };
 
   return (`<section class="film-details">
   <form class="film-details__inner" action="" method="get">
@@ -96,7 +106,7 @@ const createPopupTemplate = (movieToShow, comments) => {
         </ul>
 
         <div class="film-details__new-comment">
-          <div class="film-details__add-emoji-label"></div>
+          <div class="film-details__add-emoji-label">${ insertEmoji() }</div>
 
           <label class="film-details__comment-label">
             <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
@@ -130,28 +140,37 @@ const createPopupTemplate = (movieToShow, comments) => {
   </section>`);
 };
 
-export default class PopupView extends AbstractView{
-  #comments = null;
+export default class PopupView extends SmartView{
+  comments = null;
   movie = null;
+  emotion = null;
+  commentText = null;
+  totalComments = null;
+  scrollPosition = 0;
 
   constructor (movieToShow, comments) {
     super();
-    this.#comments = comments;
     this.movie = movieToShow;
-    this.setClickHandler();
+    this.totalComments = comments.length;
+    this._data = PopupView.parseCommentToData(comments);
+    this.restoreHandlers();
   }
 
   get template () {
-    return createPopupTemplate(this.movie, this.#comments);
+    return createPopupTemplate(this.movie, this._data);
   }
 
   removeElement () {
-    const popupElement = document.querySelector('.film-details');
-    const bodyTag = document.querySelector('body');
-    if (popupElement) {
-      bodyTag.removeChild(this.element);
-      bodyTag.classList.remove('hide-overflow');
-    }
+    this.element.remove();
+    super.removeElement();
+
+    document.querySelector('body').classList.remove('hide-overflow');
+  }
+
+  parseEmotion = (clickedElement) => {
+    const clickedParent = clickedElement.closest('label');
+    const labelForAttribure = clickedParent.getAttribute('for');
+    this.emotion = labelForAttribure.replace('emoji-', '');
   }
 
   setWatchlistCallback = (callback) => {
@@ -174,6 +193,27 @@ export default class PopupView extends AbstractView{
     this.element.addEventListener('click', this.#clickHandler);
   }
 
+  setInputHandler = () => {
+    const commentInputField = this.element.querySelector('.film-details__comment-input');
+    commentInputField.addEventListener('input', this.#inputHandler);
+  }
+
+  setScrollPosition = () => {
+    this.element.scrollTop = this.scrollPosition;
+  }
+
+  setScrollHandler = () => {
+    this.element.addEventListener('scroll', this.#scrollHandler);
+  }
+
+  static parseCommentToData = (comments) => ([...comments,{
+    emotion: this.emotion===null,
+    comment: this.commentText===null}]);
+
+  #scrollHandler = (evt) => {
+    this.scrollPosition = evt.target.scrollTop;
+  }
+
   #clickHandler = (evt) => {
     evt.preventDefault();
     const clickedElement = evt.target;
@@ -188,7 +228,22 @@ export default class PopupView extends AbstractView{
       clickedElement.classList.toggle('film-details__control-button--active');
     } else if (clickedElement.classList.contains ('film-details__close-btn')) {
       this._callback?.close();
+    } else if (clickedElement.getAttribute('alt') === 'emoji') {
+      this.parseEmotion(clickedElement);
+      this.updateData(this.totalComments,'emotion',this.emotion, false);
     }
+  }
+
+  #inputHandler = (evt) => {
+    this.commentText = evt.target.value;
+    this.updateData(this.totalComments,'comment',this.commentText, true);
+  }
+
+  restoreHandlers = () => {
+    this.setClickHandler();
+    this.setInputHandler();
+    this.setScrollHandler();
+    this.setScrollPosition();
   }
 }
 
