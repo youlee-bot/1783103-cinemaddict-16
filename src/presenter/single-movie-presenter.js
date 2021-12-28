@@ -30,7 +30,7 @@ export default class SingleMoviePresenter {
   }
 
   #showPopup = (movieItem, comments) => {
-    if (document.querySelector('.film-details')) {
+    if(PopupView.isOpenPoupView()) {
       return;
     }
 

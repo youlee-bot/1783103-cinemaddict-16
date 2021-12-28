@@ -15,11 +15,14 @@ export default class SmartView extends AbstractView {
     this.updateElement();
   }
 
+  restoreHandlers = () => {
+
+  }
+
   updateElement = () => {
     const prevElement = this.element;
     const parent = prevElement.parentElement;
     this.removeElement();
-    prevElement.remove();
 
     const newElement = this.element;
     parent.appendChild(newElement);

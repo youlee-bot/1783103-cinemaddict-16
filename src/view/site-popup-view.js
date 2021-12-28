@@ -245,5 +245,7 @@ export default class PopupView extends SmartView{
     this.setScrollHandler();
     this.setScrollPosition();
   }
+
+  static isOpenPoupView = () => (document.querySelector('.film-details'));
 }
 
