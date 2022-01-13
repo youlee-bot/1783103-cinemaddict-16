@@ -185,6 +185,10 @@ export default class PopupView extends SmartView{
     this._callback.favorite = callback;
   }
 
+  setSubmitCallback = (callback) => {
+    this._callback.submit = callback;
+  }
+
   setCloseCallback = (callback) => {
     this._callback.close = callback;
   }
@@ -204,6 +208,10 @@ export default class PopupView extends SmartView{
 
   setScrollHandler = () => {
     this.element.addEventListener('scroll', this.#scrollHandler);
+  }
+
+  setSubmitHandler = () => {
+    document.addEventListener('keypress', this.#submitHandler);
   }
 
   static parseCommentToData = (comments) => ([...comments,{
@@ -239,11 +247,19 @@ export default class PopupView extends SmartView{
     this.updateData(this.totalComments,'comment',this.commentText, true);
   }
 
+  #submitHandler = (evt) => {
+    if (evt.key === 'Enter') {
+      evt.preventDefault();
+      this._callback?.submit();
+    }
+  }
+
   restoreHandlers = () => {
     this.setClickHandler();
     this.setInputHandler();
     this.setScrollHandler();
     this.setScrollPosition();
+    this.setSubmitHandler();
   }
 
   static isOpenPoupView = () => (document.querySelector('.film-details'));

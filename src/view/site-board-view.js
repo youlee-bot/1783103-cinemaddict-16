@@ -6,4 +6,16 @@ export default class BoardView extends AbstractView {
   get template() {
     return createBoardTemplate();
   }
+
+  static getBoardContainerTag () {
+    return document.querySelector('.films-list__container');
+  }
+
+  static getFilmListTag () {
+    return document.querySelector('.films-list');
+  }
+
+  static getFooterTag () {
+    return document.querySelector('.footer__statistics');
+  }
 }
