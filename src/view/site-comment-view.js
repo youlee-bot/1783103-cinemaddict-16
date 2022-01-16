@@ -18,14 +18,35 @@ const createCommentTemplate = (content) => (`<li class="film-details__comment">
 </li>`);
 
 export default class CommentView extends AbstractView{
-  #content = null;
+  content = null;
 
   constructor (content) {
     super();
-    this.#content = content;
+    this.content = content;
+    this.setDeleteHandler();
+  }
+
+  removeElement () {
+    this.element.remove();
+    super.removeElement();
+  }
+
+  setDeleteCallback = (callback) => {
+    this._callback.delete = callback;
+  }
+
+  setDeleteHandler = () => {
+    const deleteButton = this.element.querySelector('.film-details__comment-delete');
+    deleteButton.addEventListener('click', this.removeElement());
+  }
+
+  #deleteHandler = (evt) => {
+    if (evt.target.classList.contains('film-details__comment-delete')) {
+      this._callback.delete();
+    }
   }
 
   get template () {
-    return createCommentTemplate(this.#content);
+    return createCommentTemplate(this.content);
   }
 }

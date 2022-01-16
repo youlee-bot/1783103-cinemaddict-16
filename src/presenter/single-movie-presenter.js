@@ -2,6 +2,7 @@ import ItemView from '../view/site-item-view';
 import PopupView from '../view/site-popup-view';
 import { UserAction, UpdateType } from '../const';
 import { remove, render, RenderPosition, replace } from '../render';
+import PopUpPresenter from './popup-presenter';
 
 export default class SingleMoviePresenter {
   #filmListContainer = null;
@@ -11,13 +12,14 @@ export default class SingleMoviePresenter {
   #changeData = null;
   #movieComponent = null;
   #commentsModel = null;
+  #moviesModel = null;
   #currentPopUp = null;
 
-  constructor (filmListContainer, commentsModel, changedata) {
+  constructor (filmListContainer, commentsModel, moviesModel, changedata) {
     this.#commentsModel = commentsModel;
+    this.#moviesModel = moviesModel;
     this.#filmListContainer = filmListContainer;
     this.#changeData = changedata;
-    this.#commentsModel.addObserver(this.#handleModelEvent);
   }
 
   init (movie) {
@@ -25,11 +27,11 @@ export default class SingleMoviePresenter {
     this.#movie = movie;
     this.#movieComponent = new ItemView(this.#movie);
     this.#movieComponent.setClickCallback (()=>{
-      this.#showPopup(this.#movie, this.#currentMovieComments());
+      this.#showPopup(this.#movie);
     });
     this.#controlsSetHandlers(this.#movieComponent, this.#movie);
     this.#movieComponent.setClickHandler();
-    this.#bodyTag = document.querySelector('body');
+
     if (prevMovie===null) {
       render (this.#filmListContainer, this.#movieComponent, RenderPosition.BEFOREEND);
       return;
@@ -40,18 +42,6 @@ export default class SingleMoviePresenter {
   destroy = () => {
     remove(this.#movieComponent);
   };
-
-  #currentMovieComments = () => {
-    const movieComments = [];
-
-    for (const index of this.#commentsModel.comments) {
-      if (index.movieId===this.#movie.id) {
-        movieComments.push(index);
-      }
-    }
-
-    return movieComments;
-  }
 
   #controlsSetHandlers = (component) => {
     component.setFavoriteCallback (()=>{
@@ -68,46 +58,7 @@ export default class SingleMoviePresenter {
   };
 
   #showPopup = (movieItem) => {
-    if(PopupView.isOpenPoupView()) {
-      return;
-    }
-
-    this.#currentPopUp = new PopupView(movieItem, this.#currentMovieComments())
-
-    const currentPopup = this.#currentPopUp;
-    this.#controlsSetHandlers(currentPopup);
-    currentPopup.setSubmitCallback(()=>this.#handleViewAction(UserAction.ADD_COMMENT, UpdateType.PATCH,
-      {
-      modieId: this.#movie.id,
-      author: 'admin',
-      date:'2021-12-16T03:41:49+08:00',
-      emotion: currentPopup.emotion,
-      comment: currentPopup.commentText,
-    }
-    ));
-    currentPopup.setCloseCallback(()=>currentPopup.removeElement());
-    this.#bodyTag.classList.add('hide-overflow');
-    this.#bodyTag.appendChild(currentPopup.element);
-
-  }
-
-  #handleViewAction = (actionType, updateType, update) => {
-    switch (actionType) {
-      case UserAction.ADD_COMMENT:
-        this.#commentsModel.addComment(updateType, update);
-        break;
-    }
-  }
-
-  #handleModelEvent = (updateType, data) => {
-    switch (updateType) {
-      case UpdateType.PATCH:
-        //this.#currentPopUp.removeElement();
-        this.#showPopup(this.#movie);
-        break;
-      case UpdateType.MINOR:
-        break;
-      case UpdateType.MAJOR:
-    }
+    const popUpPresenter = new PopUpPresenter (this.#moviesModel, this.#commentsModel, movieItem);
+    popUpPresenter.init();
   }
 }

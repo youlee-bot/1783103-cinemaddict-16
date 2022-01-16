@@ -4,13 +4,13 @@ import { genresWrapSpan } from '../site-utils';
 import CommentView from './site-comment-view';
 import SmartView from './smart-view';
 
-const createPopupTemplate = (movieToShow, comments) => {
+const createPopupTemplate = (movieToShow, comments, commentsComponents) => {
 
   const showComments = () => {
     let movieComments = '';
-    comments.forEach((comment) => {
-      if (comment.movieId>=0) {
-        movieComments += (new CommentView(comment).element).outerHTML;
+    commentsComponents.forEach((comment) => {
+      if (comment.content.movieId>=0) {
+        movieComments += (comment.element).outerHTML;
       }
     });
 
@@ -147,17 +147,17 @@ export default class PopupView extends SmartView{
   commentText = null;
   totalComments = null;
   scrollPosition = 0;
+  #commentsElements = null;
 
   constructor (movieToShow, comments) {
     super();
     this.movie = movieToShow;
-    this.totalComments = comments.length;
-    this._data = PopupView.parseCommentToData(comments);
+    this._data = this.parseCommentToData(comments);
     this.restoreHandlers();
   }
 
   get template () {
-    return createPopupTemplate(this.movie, this._data);
+    return createPopupTemplate(this.movie, this._data, this.#commentsElements);
   }
 
   removeElement () {
@@ -214,9 +214,17 @@ export default class PopupView extends SmartView{
     document.addEventListener('keypress', this.#submitHandler);
   }
 
-  static parseCommentToData = (comments) => ([...comments,{
-    emotion: this.emotion===null,
-    comment: this.commentText===null}]);
+  parseCommentToData = (comments) => {
+    const arrayOfComments = [];
+    this.#commentsElements = comments;
+    comments.forEach((comment) => {
+      arrayOfComments.push(comment.content);
+    });
+
+    return ([...arrayOfComments, {
+      emotion: this.emotion,
+      comment: this.commentText}]);
+  }
 
   #scrollHandler = (evt) => {
     this.scrollPosition = evt.target.scrollTop;
@@ -238,13 +246,14 @@ export default class PopupView extends SmartView{
       this._callback?.close();
     } else if (clickedElement.getAttribute('alt') === 'emoji') {
       this.parseEmotion(clickedElement);
-      this.updateData(this.totalComments,'emotion',this.emotion, false);
+
+      this.updateData((this._data.length-1),'emotion',this.emotion, false);
     }
   }
 
   #inputHandler = (evt) => {
     this.commentText = evt.target.value;
-    this.updateData(this.totalComments,'comment',this.commentText, true);
+    this.updateData((this._data.length-1),'comment',this.commentText, true);
   }
 
   #submitHandler = (evt) => {

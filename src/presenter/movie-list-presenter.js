@@ -118,7 +118,7 @@ export default class MovieListPresenter {
     if (!movieItem) {
       return;
     }
-    const MoviePresenter = new SingleMoviePresenter(container, this.#commentsModel, this.#handleViewAction);
+    const MoviePresenter = new SingleMoviePresenter(container, this.#commentsModel,this.#moviesModel, this.#handleViewAction);
     MoviePresenter.init(movieItem);
     this.#SingleMoviePresenter.set(movieItem.id, MoviePresenter);
   }

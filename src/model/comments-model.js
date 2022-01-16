@@ -13,7 +13,6 @@ export default class CommentsModel extends AbstractObservable {
 
   addComment = (updateType, update) => {
     this.#comments = [update,...this.#comments,];
-    console.log(this.#comments);
     this._notify(updateType, update);
   }
 
