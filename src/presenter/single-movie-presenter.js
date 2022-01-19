@@ -7,15 +7,15 @@ import PopUpPresenter from './popup-presenter';
 export default class SingleMoviePresenter {
   #filmListContainer = null;
   #movie = null;
-  #comments = null;
-  #bodyTag = null;
   #changeData = null;
   #movieComponent = null;
   #commentsModel = null;
   #moviesModel = null;
-  #currentPopUp = null;
+  #bodyTag = null;
 
-  constructor (filmListContainer, commentsModel, moviesModel, changedata) {
+
+  constructor (bodyTag, filmListContainer, commentsModel, moviesModel, changedata) {
+    this.#bodyTag = bodyTag;
     this.#commentsModel = commentsModel;
     this.#moviesModel = moviesModel;
     this.#filmListContainer = filmListContainer;
@@ -29,7 +29,7 @@ export default class SingleMoviePresenter {
     this.#movieComponent.setClickCallback (()=>{
       this.#showPopup(this.#movie);
     });
-    this.#controlsSetHandlers(this.#movieComponent, this.#movie);
+    this.#controlsSetHandlers(this.#movieComponent);
     this.#movieComponent.setClickHandler();
 
     if (prevMovie===null) {
@@ -45,20 +45,20 @@ export default class SingleMoviePresenter {
 
   #controlsSetHandlers = (component) => {
     component.setFavoriteCallback (()=>{
-      this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.MAJOR, {...this.#movie, userDetails:{...this.#movie.userDetails, favorite: !this.#movie.userDetails.favorite}});
+      this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.#movie, userDetails:{...this.#movie.userDetails, favorite: !this.#movie.userDetails.favorite}});
     });
 
     component.setWatchCallback (()=>{
-      this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.MAJOR, {...this.#movie, userDetails:{...this.#movie.userDetails, alreadyWatched: !this.#movie.userDetails.alreadyWatched}});
+      this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.#movie, userDetails:{...this.#movie.userDetails, alreadyWatched: !this.#movie.userDetails.alreadyWatched}});
     });
 
     component.setWatchlistCallback (()=>{
-      this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.MAJOR, {...this.#movie, userDetails:{...this.#movie.userDetails, watchlist: !this.#movie.userDetails.watchlist}});
+      this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.#movie, userDetails:{...this.#movie.userDetails, watchlist: !this.#movie.userDetails.watchlist}});
     });
   };
 
   #showPopup = (movieItem) => {
-    const popUpPresenter = new PopUpPresenter (this.#moviesModel, this.#commentsModel, movieItem);
+    const popUpPresenter = new PopUpPresenter (this.#bodyTag, this.#moviesModel, this.#commentsModel, movieItem, this.#changeData);
     popUpPresenter.init();
   }
 }

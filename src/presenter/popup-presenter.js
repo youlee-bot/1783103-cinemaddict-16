@@ -11,16 +11,26 @@ export default class PopUpPresenter {
   #prevPopUp = null;
   #comments = null;
   #commentComponents = new Set();
+  #changeData = null;
 
-  constructor (moviesModel, commentsModel, movie) {
+  constructor (bodyTag, moviesModel, commentsModel, movie, changeData) {
+    this.#bodyTag = bodyTag;
     this.#moviesModel = moviesModel;
     this.#commentsModel = commentsModel;
     this.#movie = movie;
-    this.#commentsModel.addObserver(this.#handleModelEvent);
-    this.#moviesModel.addObserver(this.#handleModelEvent);
+    this.#changeData = changeData;
+
+  }
+
+  get movie () {
+    const index = this.#moviesModel.movies.findIndex((movie) => movie.id === this.#movie.id);
+    return this.#moviesModel.movies[index];
   }
 
   init (reInit=false) {
+    this.#commentsModel.addObserver(this.#handleModelEvent);
+    this.#moviesModel.addObserver(this.#changeData);
+
     if (reInit) {
       this.#prevPopUp.removeElement();
       this.#commentComponents = new Set();
@@ -28,63 +38,64 @@ export default class PopUpPresenter {
       this.#comments = this.#commentsModel.comments;
     }
 
-
     this.#currentMovieComments(this.#comments);
-    const currentPopup = new PopupView(this.#movie, this.#commentComponents);
+    this.#prevPopUp = new PopupView(this.movie, this.#commentComponents);
 
-    if (!reInit) {
-      this.#prevPopUp = currentPopup;
-    }
-
-    this.#bodyTag = document.querySelector('body');
-
-    this.#controlsSetHandlers(currentPopup);
-    currentPopup.setSubmitCallback(()=>this.#handleViewAction(UserAction.ADD_COMMENT, UpdateType.PATCH,
-      {
-        movieId: this.#movie.id,
-        author: 'admin',
-        date:'2021-12-16T03:41:49+08:00',
-        emotion: currentPopup.emotion,
-        comment: currentPopup.commentText,
+    this.#controlsSetHandlers(this.#prevPopUp);
+    this.#prevPopUp.setSubmitCallback(()=>{
+      if (this.#prevPopUp.commentText) {
+        this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, comments: this.movie.comments+1,});
+        this.#handleViewAction(UserAction.ADD_COMMENT, UpdateType.MAJOR,
+          {
+            movieId: this.movie.id,
+            author: 'admin',
+            date:'2021-12-16T03:41:49+08:00',
+            emotion: this.#prevPopUp.emotion,
+            comment: this.#prevPopUp.commentText,
+          }
+        );
       }
-    ));
-    currentPopup.setCloseCallback(()=>currentPopup.removeElement());
+    });
+    this.#prevPopUp.setCloseCallback(()=>this.#prevPopUp.removeElement());
     this.#bodyTag.classList.add('hide-overflow');
-
-
 
     if(PopupView.isOpenPoupView()) {
       return;
     }
 
-    this.#bodyTag.appendChild(currentPopup.element);
+    this.#bodyTag.appendChild(this.#prevPopUp.element);
 
   }
 
   #controlsSetHandlers = (component) => {
     component.setFavoriteCallback (()=>{
-      this.#handleViewAction(UserAction.UPDATE_MOVIE, UpdateType.MAJOR, {...this.#movie, userDetails:{...this.#movie.userDetails, favorite: !this.#movie.userDetails.favorite}});
+      this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, userDetails:{...this.movie.userDetails, favorite: !this.movie.userDetails.favorite}});
     });
 
     component.setWatchCallback (()=>{
-      this.#handleViewAction(UserAction.UPDATE_MOVIE, UpdateType.MAJOR, {...this.#movie, userDetails:{...this.#movie.userDetails, alreadyWatched: !this.#movie.userDetails.alreadyWatched}});
+      this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, userDetails:{...this.movie.userDetails, alreadyWatched: !this.movie.userDetails.alreadyWatched}});
     });
 
     component.setWatchlistCallback (()=>{
-      this.#handleViewAction(UserAction.UPDATE_MOVIE, UpdateType.MAJOR, {...this.#movie, userDetails:{...this.#movie.userDetails, watchlist: !this.#movie.userDetails.watchlist}});
+      this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, userDetails:{...this.movie.userDetails, watchlist: !this.movie.userDetails.watchlist}});
     });
   };
 
   #currentMovieComments = (comments) => {
     const movieComments = [];
     for (const index of comments) {
-      if (index.movieId===this.#movie.id) {
+      if (index.movieId===this.movie.id) {
         movieComments.push(index);
         this.#commentComponents.add(new CommentView(index));
       }
     }
     this.#commentComponents.forEach(commentComponent => {
-      commentComponent.setDeleteCallback(()=>this.removeElement());
+      commentComponent.setDeleteCallback(()=>{
+        commentComponent.removeElement();
+
+        this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, comments: this.movie.comments-1,});
+        this.#handleViewAction(UserAction.DELETE_COMMENT, UpdateType.MINOR, commentComponent.content);
+      });
     });
     return movieComments;
   }
@@ -92,21 +103,26 @@ export default class PopUpPresenter {
   #handleViewAction = (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.ADD_COMMENT:
+        this.#moviesModel.addComment(updateType, update);
         this.#commentsModel.addComment(updateType, update);
+        break;
+      case UserAction.DELETE_COMMENT:
+        this.#commentsModel.deleteComment(updateType, update);
+        this.#moviesModel.deleteComment(updateType, update);
         break;
     }
   }
 
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
-      case UpdateType.PATCH:
-        //this.#currentPopUp.removeElement();
+      case UpdateType.MINOR:
+        this.#comments = this.#commentsModel.comments;
+        this.init(true);
+        break;
+      case UpdateType.MAJOR:
         this.#comments = [data, ...this.#comments];
         this.init(true);
         break;
-      case UpdateType.MINOR:
-        break;
-      case UpdateType.MAJOR:
     }
   }
 }

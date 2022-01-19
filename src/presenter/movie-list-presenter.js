@@ -28,6 +28,7 @@ export default class MovieListPresenter {
   #moviesModel = null;
   #commentsModel = null;
   #filterModel = null;
+  #bodyTag = null;
 
   constructor (movieList, movies, comments, filterModel) {
     this.#boardContainer = movieList;
@@ -65,10 +66,12 @@ export default class MovieListPresenter {
     return topRated.sort(sortByField('totalRating'));
   }
 
-  init = (moviesToShow=this.movies, reinit=false) => {
+  init = (reinit=false) => {
+
     render (this.#boardContainer, this.#boardComponent, RenderPosition.BEFOREEND);
     this.#filmListContainer = BoardView.getBoardContainerTag();
     this.#filmListTag = BoardView.getFilmListTag();
+    this.#bodyTag = BoardView.getBodyTag();
     if (this.movies.length===0) {
       this.#renderNoContent(this.#filterType);
       return;
@@ -118,7 +121,7 @@ export default class MovieListPresenter {
     if (!movieItem) {
       return;
     }
-    const MoviePresenter = new SingleMoviePresenter(container, this.#commentsModel,this.#moviesModel, this.#handleViewAction);
+    const MoviePresenter = new SingleMoviePresenter(this.#bodyTag, container, this.#commentsModel,this.#moviesModel, this.#handleViewAction);
     MoviePresenter.init(movieItem);
     this.#SingleMoviePresenter.set(movieItem.id, MoviePresenter);
   }
@@ -180,13 +183,11 @@ export default class MovieListPresenter {
       case UpdateType.PATCH:
         this.#SingleMoviePresenter.get(data.id).init(data);
         break;
-      case UpdateType.MINOR:
-        break;
       case UpdateType.MAJOR:
         this.#clearBoard();
         this.#displayedMovieCards = 5;
         this.#currentSortType = SortType.DEFAULT;
-        this.init(this.#displayedMovieCards, true);
+        this.init(true);
         break;
     }
   }

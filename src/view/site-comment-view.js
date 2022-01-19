@@ -37,7 +37,7 @@ export default class CommentView extends AbstractView{
 
   setDeleteHandler = () => {
     const deleteButton = this.element.querySelector('.film-details__comment-delete');
-    deleteButton.addEventListener('click', this.removeElement());
+    deleteButton.addEventListener('click', this.#deleteHandler);
   }
 
   #deleteHandler = (evt) => {

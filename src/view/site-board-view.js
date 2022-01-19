@@ -15,6 +15,10 @@ export default class BoardView extends AbstractView {
     return document.querySelector('.films-list');
   }
 
+  static getBodyTag () {
+    return document.querySelector('body');
+  }
+
   static getFooterTag () {
     return document.querySelector('.footer__statistics');
   }

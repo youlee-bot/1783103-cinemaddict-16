@@ -17,7 +17,11 @@ export default class CommentsModel extends AbstractObservable {
   }
 
   deleteComment = (updateType, update) => {
-    const index = this.#comments.findIndex((comment) => comment.id === update.id);
+    const index = this.#comments.findIndex((comment) => {
+      if ((comment.comment === update.comment)&(comment.date === comment.date)){
+        return 1;
+      }
+     });
 
     if (index === -1) {
       throw new Error('Can\'t delete unexisting comment');

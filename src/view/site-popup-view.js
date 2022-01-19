@@ -1,21 +1,10 @@
 import { minsToHours } from '../mock/utils';
 import dayjs from 'dayjs';
 import { genresWrapSpan } from '../site-utils';
-import CommentView from './site-comment-view';
+import { render, RenderPosition } from '../render';
 import SmartView from './smart-view';
 
-const createPopupTemplate = (movieToShow, comments, commentsComponents) => {
-
-  const showComments = () => {
-    let movieComments = '';
-    commentsComponents.forEach((comment) => {
-      if (comment.content.movieId>=0) {
-        movieComments += (comment.element).outerHTML;
-      }
-    });
-
-    return movieComments;
-  };
+const createPopupTemplate = (movieToShow, comments) => {
 
   const genreCounter = () => (movieToShow.genre.length > 1)?'s':'';
 
@@ -102,7 +91,6 @@ const createPopupTemplate = (movieToShow, comments, commentsComponents) => {
         <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${ movieToShow.comments }</span></h3>
 
         <ul class="film-details__comments-list">
-          ${ showComments(comments) }
         </ul>
 
         <div class="film-details__new-comment">
@@ -154,10 +142,12 @@ export default class PopupView extends SmartView{
     this.movie = movieToShow;
     this._data = this.parseCommentToData(comments);
     this.restoreHandlers();
+    this.renderComments();
+
   }
 
   get template () {
-    return createPopupTemplate(this.movie, this._data, this.#commentsElements);
+    return createPopupTemplate(this.movie, this._data);
   }
 
   removeElement () {
@@ -165,6 +155,15 @@ export default class PopupView extends SmartView{
     super.removeElement();
 
     document.querySelector('body').classList.remove('hide-overflow');
+  }
+
+  renderComments = () => {
+    const commentsArea = this.element.querySelector('.film-details__comments-list');
+    this.#commentsElements.forEach((comment) => {
+      if (comment.content.movieId>=0) {
+        render(commentsArea, comment, RenderPosition.AFTERBEGIN);
+      }
+    });
   }
 
   parseEmotion = (clickedElement) => {
@@ -233,15 +232,13 @@ export default class PopupView extends SmartView{
   #clickHandler = (evt) => {
     evt.preventDefault();
     const clickedElement = evt.target;
+
     if(clickedElement.classList.contains ('film-details__control-button--favorite')) {
       this._callback?.favorite();
-      clickedElement.classList.toggle('film-details__control-button--active');
     } else if (clickedElement.classList.contains ('film-details__control-button--watched')) {
       this._callback?.watch();
-      clickedElement.classList.toggle('film-details__control-button--active');
     } else if (clickedElement.classList.contains ('film-details__control-button--watchlist')) {
       this._callback?.watchlist();
-      clickedElement.classList.toggle('film-details__control-button--active');
     } else if (clickedElement.classList.contains ('film-details__close-btn')) {
       this._callback?.close();
     } else if (clickedElement.getAttribute('alt') === 'emoji') {
