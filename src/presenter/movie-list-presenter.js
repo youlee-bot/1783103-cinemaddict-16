@@ -57,12 +57,12 @@ export default class MovieListPresenter {
   }
 
   get topCommented () {
-    const topCommented = [...this.#moviesModel.movies]
+    const topCommented = [...this.#moviesModel.movies];
     return topCommented.sort(sortByField('comments'));
   }
 
   get topRated () {
-    const topRated = [...this.#moviesModel.movies]
+    const topRated = [...this.#moviesModel.movies];
     return topRated.sort(sortByField('totalRating'));
   }
 
