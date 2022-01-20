@@ -10,9 +10,9 @@ const createSortTemplate = (sortType) => (`<ul class="sort">
 export default class SortView extends AbstractView{
   #SortType = null;
 
-  constructor(SortType) {
+  constructor(SelectedSortType) {
     super();
-    this.#SortType = SortType;
+    this.#SortType = SelectedSortType;
   }
 
   get template() {

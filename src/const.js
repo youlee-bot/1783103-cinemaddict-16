@@ -21,7 +21,7 @@ export const SortType = {
   DEFAULT: 'default',
   DATE: 'date',
   RATING: 'rating',
-}
+};
 
 export const noContenTexts = {
   all: 'There are no movies in our database',

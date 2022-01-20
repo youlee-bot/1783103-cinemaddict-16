@@ -143,7 +143,7 @@ export default class PopupView extends SmartView{
     this._data = this.parseCommentToData(comments);
     this.restoreHandlers();
     this.renderComments();
-
+    this.setEscapeHandler();
   }
 
   get template () {
@@ -153,7 +153,6 @@ export default class PopupView extends SmartView{
   removeElement () {
     this.element.remove();
     super.removeElement();
-
     document.querySelector('body').classList.remove('hide-overflow');
   }
 
@@ -213,6 +212,10 @@ export default class PopupView extends SmartView{
     document.addEventListener('keypress', this.#submitHandler);
   }
 
+  setEscapeHandler = () => {
+    document.addEventListener('keydown', this.#escapeHandler);
+  }
+
   parseCommentToData = (comments) => {
     const arrayOfComments = [];
     this.#commentsElements = comments;
@@ -223,6 +226,13 @@ export default class PopupView extends SmartView{
     return ([...arrayOfComments, {
       emotion: this.emotion,
       comment: this.commentText}]);
+  }
+
+  #escapeHandler = (evt) => {
+    if (evt.key === 'Escape') {
+      evt.preventDefault();
+      this.removeElement();
+    }
   }
 
   #scrollHandler = (evt) => {
@@ -246,7 +256,6 @@ export default class PopupView extends SmartView{
       this._callback?.close();
     } else if (clickedElement.getAttribute('alt') === 'emoji') {
       this.parseEmotion(clickedElement);
-
       this.updateData((this._data.length-1),'emotion',this.emotion, false);
     }
   }

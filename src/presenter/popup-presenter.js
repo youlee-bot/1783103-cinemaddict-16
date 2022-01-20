@@ -2,6 +2,8 @@
 import { UserAction,UpdateType } from '../const';
 import PopupView from '../view/site-popup-view';
 import CommentView from '../view/site-comment-view';
+import dayjs from 'dayjs';
+import he from 'he';
 
 export default class PopUpPresenter {
   #movie = null;
@@ -43,15 +45,15 @@ export default class PopUpPresenter {
 
     this.#controlsSetHandlers(this.#prevPopUp);
     this.#prevPopUp.setSubmitCallback(()=>{
-      if (this.#prevPopUp.commentText) {
+      if (this.#prevPopUp.commentText&&this.#prevPopUp.emotion) {
         this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, comments: this.movie.comments+1,});
         this.#handleViewAction(UserAction.ADD_COMMENT, UpdateType.MAJOR,
           {
             movieId: this.movie.id,
             author: 'admin',
-            date:'2021-12-16T03:41:49+08:00',
+            date:dayjs(),
             emotion: this.#prevPopUp.emotion,
-            comment: this.#prevPopUp.commentText,
+            comment: he.encode(this.#prevPopUp.commentText),
           }
         );
       }
@@ -89,7 +91,7 @@ export default class PopUpPresenter {
         this.#commentComponents.add(new CommentView(index));
       }
     }
-    this.#commentComponents.forEach(commentComponent => {
+    this.#commentComponents.forEach((commentComponent) => {
       commentComponent.setDeleteCallback(()=>{
         commentComponent.removeElement();
 

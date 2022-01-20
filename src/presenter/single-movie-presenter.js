@@ -1,5 +1,4 @@
 import ItemView from '../view/site-item-view';
-import PopupView from '../view/site-popup-view';
 import { UserAction, UpdateType } from '../const';
 import { remove, render, RenderPosition, replace } from '../render';
 import PopUpPresenter from './popup-presenter';

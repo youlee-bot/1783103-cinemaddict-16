@@ -6,7 +6,7 @@ import AbstractView from './abstract-view';
 const createItemTemplate = (movie) =>  {
   const activeButton = (status) => (status)?'film-card__controls-item--active':'';
 
-return (`<article class="film-card" data-movie-index="${ movie.id }">
+  return (`<article class="film-card" data-movie-index="${ movie.id }">
   <a class="film-card__link">
     <h3 class="film-card__title">${ movie.title }</h3>
     <p class="film-card__rating">${ movie.totalRating }</p>
@@ -25,7 +25,7 @@ return (`<article class="film-card" data-movie-index="${ movie.id }">
     <button class="film-card__controls-item film-card__controls-item--favorite ${ activeButton(movie.userDetails.favorite) } " type="button">Mark as favorite</button>
   </div>
   </article>`);
-}
+};
 
 export default class ItemView extends AbstractView{
   movie = null;

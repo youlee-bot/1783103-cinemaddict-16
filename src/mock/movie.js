@@ -16,7 +16,7 @@ import {
 } from './constants';
 
 const generateRating = () => (`${getRandomInteger(1,9)}.${getRandomInteger(0,9)}`);
-const trueFalse = () => ((getRandomInteger(0, 5)>2)?true:false)
+const trueFalse = () => ((getRandomInteger(0, 5)>2));
 
 export const generateMovie = (id) => ({
   id: id,
