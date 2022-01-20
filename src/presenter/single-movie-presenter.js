@@ -1,44 +1,63 @@
 import ItemView from '../view/site-item-view';
-import PopupView from '../view/site-popup-view';
-
-import { render, RenderPosition } from '../render';
-import { controlsSetHandlers } from './utils';
+import { UserAction, UpdateType } from '../const';
+import { remove, render, RenderPosition, replace } from '../render';
+import PopUpPresenter from './popup-presenter';
 
 export default class SingleMoviePresenter {
   #filmListContainer = null;
   #movie = null;
-  #comments = null;
+  #changeData = null;
+  #movieComponent = null;
+  #commentsModel = null;
+  #moviesModel = null;
   #bodyTag = null;
 
-  constructor (filmListContainer, movie, comments){
-    this.#movie = movie;
-    this.#comments = comments;
+
+  constructor (bodyTag, filmListContainer, commentsModel, moviesModel, changedata) {
+    this.#bodyTag = bodyTag;
+    this.#commentsModel = commentsModel;
+    this.#moviesModel = moviesModel;
     this.#filmListContainer = filmListContainer;
+    this.#changeData = changedata;
   }
 
-  init () {
-    const currentMovie = new ItemView(this.#movie);
-    render (this.#filmListContainer, currentMovie, RenderPosition.BEFOREEND);
-
-    currentMovie.setClickCallback (()=>{
-      this.#showPopup(this.#movie, this.#comments);
+  init (movie) {
+    const prevMovie = this.#movieComponent;
+    this.#movie = movie;
+    this.#movieComponent = new ItemView(this.#movie);
+    this.#movieComponent.setClickCallback (()=>{
+      this.#showPopup(this.#movie);
     });
+    this.#controlsSetHandlers(this.#movieComponent);
+    this.#movieComponent.setClickHandler();
 
-    controlsSetHandlers(currentMovie, this.#movie);
-    currentMovie.setClickHandler();
-    this.#bodyTag = document.querySelector('body');
-  }
-
-  #showPopup = (movieItem, comments) => {
-    if(PopupView.isOpenPoupView()) {
+    if (prevMovie===null) {
+      render (this.#filmListContainer, this.#movieComponent, RenderPosition.BEFOREEND);
       return;
     }
+    replace(this.#movieComponent, prevMovie);
+  }
 
-    const currentPopup = new PopupView(movieItem, comments);
+  destroy = () => {
+    remove(this.#movieComponent);
+  };
 
-    controlsSetHandlers(currentPopup, this.#movie);
-    currentPopup.setCloseCallback(()=>currentPopup.removeElement());
-    this.#bodyTag.classList.add('hide-overflow');
-    this.#bodyTag.appendChild(currentPopup.element);
+  #controlsSetHandlers = (component) => {
+    component.setFavoriteCallback (()=>{
+      this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.#movie, userDetails:{...this.#movie.userDetails, favorite: !this.#movie.userDetails.favorite}});
+    });
+
+    component.setWatchCallback (()=>{
+      this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.#movie, userDetails:{...this.#movie.userDetails, alreadyWatched: !this.#movie.userDetails.alreadyWatched}});
+    });
+
+    component.setWatchlistCallback (()=>{
+      this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.#movie, userDetails:{...this.#movie.userDetails, watchlist: !this.#movie.userDetails.watchlist}});
+    });
+  };
+
+  #showPopup = (movieItem) => {
+    const popUpPresenter = new PopUpPresenter (this.#bodyTag, this.#moviesModel, this.#commentsModel, movieItem, this.#changeData);
+    popUpPresenter.init();
   }
 }

@@ -16,6 +16,7 @@ import {
 } from './constants';
 
 const generateRating = () => (`${getRandomInteger(1,9)}.${getRandomInteger(0,9)}`);
+const trueFalse = () => ((getRandomInteger(0, 5)>2));
 
 export const generateMovie = (id) => ({
   id: id,
@@ -38,8 +39,8 @@ export const generateMovie = (id) => ({
     .join('.'),
   comments: getRandomInteger(0, 5),
   userDetails: {
-    watchlist: false,
-    alreadyWatched: false,
-    favorite: false,
+    watchlist: trueFalse(),
+    alreadyWatched: trueFalse(),
+    favorite: trueFalse(),
   }
 });

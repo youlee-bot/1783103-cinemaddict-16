@@ -24,7 +24,9 @@ export default class SmartView extends AbstractView {
     const parent = prevElement.parentElement;
     this.removeElement();
 
+
     const newElement = this.element;
+    this.renderComments();
     parent.appendChild(newElement);
     this.restoreHandlers();
   }

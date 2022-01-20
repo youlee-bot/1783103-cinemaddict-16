@@ -1,21 +1,10 @@
 import { minsToHours } from '../mock/utils';
 import dayjs from 'dayjs';
 import { genresWrapSpan } from '../site-utils';
-import CommentView from './site-comment-view';
+import { render, RenderPosition } from '../render';
 import SmartView from './smart-view';
 
 const createPopupTemplate = (movieToShow, comments) => {
-
-  const showComments = () => {
-    let movieComments = '';
-    comments.forEach((comment) => {
-      if (comment.movieId>=0) {
-        movieComments += (new CommentView(comment).element).outerHTML;
-      }
-    });
-
-    return movieComments;
-  };
 
   const genreCounter = () => (movieToShow.genre.length > 1)?'s':'';
 
@@ -102,7 +91,6 @@ const createPopupTemplate = (movieToShow, comments) => {
         <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${ movieToShow.comments }</span></h3>
 
         <ul class="film-details__comments-list">
-          ${ showComments(comments) }
         </ul>
 
         <div class="film-details__new-comment">
@@ -147,13 +135,15 @@ export default class PopupView extends SmartView{
   commentText = null;
   totalComments = null;
   scrollPosition = 0;
+  #commentsElements = null;
 
   constructor (movieToShow, comments) {
     super();
     this.movie = movieToShow;
-    this.totalComments = comments.length;
-    this._data = PopupView.parseCommentToData(comments);
+    this._data = this.parseCommentToData(comments);
     this.restoreHandlers();
+    this.renderComments();
+    this.setEscapeHandler();
   }
 
   get template () {
@@ -163,8 +153,16 @@ export default class PopupView extends SmartView{
   removeElement () {
     this.element.remove();
     super.removeElement();
-
     document.querySelector('body').classList.remove('hide-overflow');
+  }
+
+  renderComments = () => {
+    const commentsArea = this.element.querySelector('.film-details__comments-list');
+    this.#commentsElements.forEach((comment) => {
+      if (comment.content.movieId>=0) {
+        render(commentsArea, comment, RenderPosition.AFTERBEGIN);
+      }
+    });
   }
 
   parseEmotion = (clickedElement) => {
@@ -183,6 +181,10 @@ export default class PopupView extends SmartView{
 
   setFavoriteCallback = (callback) => {
     this._callback.favorite = callback;
+  }
+
+  setSubmitCallback = (callback) => {
+    this._callback.submit = callback;
   }
 
   setCloseCallback = (callback) => {
@@ -206,9 +208,32 @@ export default class PopupView extends SmartView{
     this.element.addEventListener('scroll', this.#scrollHandler);
   }
 
-  static parseCommentToData = (comments) => ([...comments,{
-    emotion: this.emotion===null,
-    comment: this.commentText===null}]);
+  setSubmitHandler = () => {
+    document.addEventListener('keypress', this.#submitHandler);
+  }
+
+  setEscapeHandler = () => {
+    document.addEventListener('keydown', this.#escapeHandler);
+  }
+
+  parseCommentToData = (comments) => {
+    const arrayOfComments = [];
+    this.#commentsElements = comments;
+    comments.forEach((comment) => {
+      arrayOfComments.push(comment.content);
+    });
+
+    return ([...arrayOfComments, {
+      emotion: this.emotion,
+      comment: this.commentText}]);
+  }
+
+  #escapeHandler = (evt) => {
+    if (evt.key === 'Escape') {
+      evt.preventDefault();
+      this.removeElement();
+    }
+  }
 
   #scrollHandler = (evt) => {
     this.scrollPosition = evt.target.scrollTop;
@@ -217,6 +242,7 @@ export default class PopupView extends SmartView{
   #clickHandler = (evt) => {
     evt.preventDefault();
     const clickedElement = evt.target;
+
     if(clickedElement.classList.contains ('film-details__control-button--favorite')) {
       this._callback?.favorite();
       clickedElement.classList.toggle('film-details__control-button--active');
@@ -230,13 +256,20 @@ export default class PopupView extends SmartView{
       this._callback?.close();
     } else if (clickedElement.getAttribute('alt') === 'emoji') {
       this.parseEmotion(clickedElement);
-      this.updateData(this.totalComments,'emotion',this.emotion, false);
+      this.updateData((this._data.length-1),'emotion',this.emotion, false);
     }
   }
 
   #inputHandler = (evt) => {
     this.commentText = evt.target.value;
-    this.updateData(this.totalComments,'comment',this.commentText, true);
+    this.updateData((this._data.length-1),'comment',this.commentText, true);
+  }
+
+  #submitHandler = (evt) => {
+    if (evt.key === 'Enter') {
+      evt.preventDefault();
+      this._callback?.submit();
+    }
   }
 
   restoreHandlers = () => {
@@ -244,6 +277,7 @@ export default class PopupView extends SmartView{
     this.setInputHandler();
     this.setScrollHandler();
     this.setScrollPosition();
+    this.setSubmitHandler();
   }
 
   static isOpenPoupView = () => (document.querySelector('.film-details'));
