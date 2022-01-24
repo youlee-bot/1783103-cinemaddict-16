@@ -1,4 +1,4 @@
-import { minsToHours } from '../mock/utils';
+import { minsToHours } from '../site-utils';
 import dayjs from 'dayjs';
 import { genresWrapSpan } from '../site-utils';
 import { render, RenderPosition } from '../render';
@@ -245,13 +245,10 @@ export default class PopupView extends SmartView{
 
     if(clickedElement.classList.contains ('film-details__control-button--favorite')) {
       this._callback?.favorite();
-      clickedElement.classList.toggle('film-details__control-button--active');
     } else if (clickedElement.classList.contains ('film-details__control-button--watched')) {
       this._callback?.watch();
-      clickedElement.classList.toggle('film-details__control-button--active');
     } else if (clickedElement.classList.contains ('film-details__control-button--watchlist')) {
       this._callback?.watchlist();
-      clickedElement.classList.toggle('film-details__control-button--active');
     } else if (clickedElement.classList.contains ('film-details__close-btn')) {
       this._callback?.close();
     } else if (clickedElement.getAttribute('alt') === 'emoji') {

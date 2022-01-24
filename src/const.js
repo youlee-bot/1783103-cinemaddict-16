@@ -2,6 +2,7 @@ export const UserAction = {
   UPDATE_MOVIE: 'UPDATE_MOVIE',
   ADD_COMMENT: 'ADD_COMMENT',
   DELETE_COMMENT: 'DELETE_COMMENT',
+  REINIT: 'REINIT',
 };
 
 export const UpdateType = {
@@ -17,6 +18,11 @@ export const FilterType = {
   FAVORITES: 'favorites',
 };
 
+export const MenuItem = {
+  MOVIES: 'movies',
+  STATS: 'stats',
+};
+
 export const SortType = {
   DEFAULT: 'default',
   DATE: 'date',
@@ -28,4 +34,12 @@ export const noContenTexts = {
   watchlist: 'There are no movies to watch now',
   history: 'There are no watched movies now',
   favorites: 'There are no favorite movies now',
+};
+
+export const StatsType = {
+  ALL: 'all-time',
+  TODAY: 'today',
+  WEEK: 'week',
+  MONTH: 'month',
+  YEAR: 'year',
 };

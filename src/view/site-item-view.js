@@ -1,6 +1,6 @@
 import { genresWrapSpan } from '../site-utils';
 import dayjs from 'dayjs';
-import { minsToHours } from '../mock/utils';
+import { minsToHours } from '../site-utils';
 import AbstractView from './abstract-view';
 
 const createItemTemplate = (movie) =>  {

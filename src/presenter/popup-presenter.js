@@ -2,6 +2,8 @@
 import { UserAction,UpdateType } from '../const';
 import PopupView from '../view/site-popup-view';
 import CommentView from '../view/site-comment-view';
+import { render, remove } from '../render';
+import { RenderPosition } from '../render';
 import dayjs from 'dayjs';
 import he from 'he';
 
@@ -21,7 +23,6 @@ export default class PopUpPresenter {
     this.#commentsModel = commentsModel;
     this.#movie = movie;
     this.#changeData = changeData;
-
   }
 
   get movie () {
@@ -32,6 +33,7 @@ export default class PopUpPresenter {
   init (reInit=false) {
     this.#commentsModel.addObserver(this.#handleModelEvent);
     this.#moviesModel.addObserver(this.#changeData);
+    this.#moviesModel.addObserver(this.#handleMovieModelEvent);
 
     if (reInit) {
       this.#prevPopUp.removeElement();
@@ -46,7 +48,7 @@ export default class PopUpPresenter {
     this.#controlsSetHandlers(this.#prevPopUp);
     this.#prevPopUp.setSubmitCallback(()=>{
       if (this.#prevPopUp.commentText&&this.#prevPopUp.emotion) {
-        this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, comments: this.movie.comments+1,});
+
         this.#handleViewAction(UserAction.ADD_COMMENT, UpdateType.MAJOR,
           {
             movieId: this.movie.id,
@@ -56,6 +58,7 @@ export default class PopUpPresenter {
             comment: he.encode(this.#prevPopUp.commentText),
           }
         );
+        this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, comments: this.movie.comments+1,});
       }
     });
     this.#prevPopUp.setCloseCallback(()=>this.#prevPopUp.removeElement());
@@ -65,21 +68,30 @@ export default class PopUpPresenter {
       return;
     }
 
-    this.#bodyTag.appendChild(this.#prevPopUp.element);
+    render (this.#bodyTag, this.#prevPopUp, RenderPosition.BEFOREEND);
+  }
 
+  destroy = () => {
+    this.#commentsModel.removeObserver(this.#handleModelEvent);
+    this.#moviesModel.removeObserver(this.#changeData);
+    this.#moviesModel.removeObserver(this.#handleMovieModelEvent);
+    remove(this.#prevPopUp);
   }
 
   #controlsSetHandlers = (component) => {
     component.setFavoriteCallback (()=>{
       this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, userDetails:{...this.movie.userDetails, favorite: !this.movie.userDetails.favorite}});
+      this.#handlePopUpViewAction(UserAction.REINIT, UpdateType.PATCH,{});
     });
 
     component.setWatchCallback (()=>{
       this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, userDetails:{...this.movie.userDetails, alreadyWatched: !this.movie.userDetails.alreadyWatched}});
+      this.#handlePopUpViewAction(UserAction.REINIT, UpdateType.PATCH,{});
     });
 
     component.setWatchlistCallback (()=>{
       this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, userDetails:{...this.movie.userDetails, watchlist: !this.movie.userDetails.watchlist}});
+      this.#handlePopUpViewAction(UserAction.REINIT, UpdateType.PATCH,{});
     });
   };
 
@@ -124,6 +136,23 @@ export default class PopUpPresenter {
       case UpdateType.MAJOR:
         this.#comments = [data, ...this.#comments];
         this.init(true);
+        break;
+    }
+  }
+
+  #handlePopUpViewAction = (actionType, updateType, update) => {
+    switch (actionType) {
+      case UserAction.REINIT:
+        this.#commentsModel.reInit(updateType, update);
+        break;
+    }
+  }
+
+  #handleMovieModelEvent = (updateType) => {
+    switch (updateType) {
+      case UpdateType.PATCH:
+        this.init(true);
+        this.#comments = this.#commentsModel.comments;
         break;
     }
   }

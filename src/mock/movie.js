@@ -42,5 +42,7 @@ export const generateMovie = (id) => ({
     watchlist: trueFalse(),
     alreadyWatched: trueFalse(),
     favorite: trueFalse(),
+    watchingDate: generateDate('2020-10-24T16:12:32.554Z')
+      .format(),
   }
 });

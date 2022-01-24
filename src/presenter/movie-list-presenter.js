@@ -19,6 +19,8 @@ export default class MovieListPresenter {
   #filterType = FilterType.ALL;
   #boardComponent =  new BoardView();
   #moreButtonComponent = new ButtonView();
+  #ratingComponent = new RatingView();
+
   #sortComponent = null;
   #SingleMoviePresenter = new Map();
 
@@ -89,6 +91,12 @@ export default class MovieListPresenter {
     this.#renderSort();
   }
 
+  destroy = () => {
+    this.#clearBoard();
+    this.#moviesModel.removeObserver(this.#handleModelEvent);
+    this.#filterModel.removeObserver(this.#handleModelEvent);
+  }
+
   #handleSortTypeChange = (sortType) => {
     if (this.#currentSortType === sortType) {
       return;
@@ -134,7 +142,7 @@ export default class MovieListPresenter {
 
   #renderRating = () => {
     const headerTag = document.querySelector('.header');
-    render (headerTag, new RatingView(), RenderPosition.BEFOREEND);
+    render (headerTag, this.#ratingComponent, RenderPosition.BEFOREEND);
   }
 
   #renderShowMoreButton = () => {
