@@ -1,5 +1,5 @@
 import { MenuItem } from '../const';
-import AbstractView from './abstract-view';
+import SmartView from './smart-view';
 
 
 const createSiteMenuTemplate = (filter, currentFilterType, menuType) => {
@@ -20,7 +20,7 @@ const createFilterTemplate = (filterItems, currentFilterType, menuType) => {
   </nav>`);
 };
 
-export default class SiteMenuView extends AbstractView{
+export default class SiteMenuView extends SmartView{
   #filters = null;
   #currentFilter = null;
   #menuType = MenuItem.MOVIES;
@@ -29,19 +29,33 @@ export default class SiteMenuView extends AbstractView{
     super();
     this.#filters = filters;
     this.#currentFilter = currentFilterType;
+    this.#setFilterTypeChangeHandler();
   }
 
   get template() {
     return createFilterTemplate(this.#filters, this.#currentFilter, this.#menuType);
   }
 
-  setFilterTypeChangeHandler = (callback) => {
+  restoreHandlers = () => {
+    this.#setFilterTypeChangeHandler();
+  }
+
+  setFilterTypeChangeCallback = (callback) => {
     this._callback.filterTypeChange = callback;
+  }
+
+  #setFilterTypeChangeHandler = () => {
     this.element.addEventListener('click', this.#filterTypeChangeHandler);
   }
 
-  setMenuType = (type) => {
+  updateMenu = (type) => {
     this.#menuType = type;
+    const prevElement = this.element;
+    const parent = prevElement.parentElement;
+    this.element.remove();
+    this.removeElement();
+    const newElement = this.element;
+    parent.prepend(newElement);
   }
 
   setStatsClickCallback = (callback) => {
@@ -53,10 +67,14 @@ export default class SiteMenuView extends AbstractView{
     if (evt.target.dataset.type){
       this._callback.filterTypeChange(evt.target.dataset.type);
       this._callback.statsClick(MenuItem.MOVIES);
+      this.updateMenu(MenuItem.MOVIES);
+      this.restoreHandlers();
     }
     if (evt.target.dataset.stats) {
-      this.setMenuType(MenuItem.STATS);
+      this.updateMenu(MenuItem.STATS);
       this._callback.statsClick(MenuItem.STATS);
+      this.restoreHandlers();
+
     }
   }
 }

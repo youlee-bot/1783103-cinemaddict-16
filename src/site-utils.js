@@ -17,23 +17,14 @@ export const filter = {
   [FilterType.WATCHLIST]: (movies) => movies.filter((movie) => movie.userDetails.watchlist),
 };
 
-export const minsToHours = (mins, stats=false) => {
+export const minsToHours = (mins) => {
   const hours = (mins / 60);
   const resultHours = Math.floor(hours);
   const minutes = (hours - resultHours) * 60;
   const resultMinutes = Math.round(minutes);
-  if (stats===false) {
-    if (resultHours === 0) {
-      return `${resultMinutes  }m`;
-    } else {
-      return `${resultHours  }h ${  resultMinutes  }m`;
-    }
+  if (resultHours === 0) {
+    return `${resultMinutes  }m`;
   } else {
-    if (resultHours === 0) {
-      return `${resultMinutes  }<span class="statistic__item-description">m</span>`;
-    } else {
-      return `${resultHours  }<span class="statistic__item-description">h</span> ${  resultMinutes  }<span class="statistic__item-description">m</span>`;
-    }
+    return `${resultHours  }h ${  resultMinutes  }m`;
   }
-
 };

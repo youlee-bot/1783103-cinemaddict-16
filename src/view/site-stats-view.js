@@ -71,7 +71,9 @@ const renderChart = (statisticCtx, data) => {
 };
 
 const createStatisticsTemplate = (data) => {
-  timeCount(data.movies);
+
+  const styleTotalDuration = timeCount(getDataForPeriod(data)).replace('m', '<span class="statistic__item-description">m</span>').replace('h', '<span class="statistic__item-description">h</span>');
+
   return (`<section class="statistic">
   <p class="statistic__rank">
     Your rank
@@ -105,7 +107,7 @@ const createStatisticsTemplate = (data) => {
     </li>
     <li class="statistic__text-item">
       <h4 class="statistic__item-title">Total duration</h4>
-      <p class="statistic__item-text">${ timeCount(getDataForPeriod(data)) }</p>
+      <p class="statistic__item-text">${ styleTotalDuration }</p>
     </li>
     <li class="statistic__text-item">
       <h4 class="statistic__item-title">Top genre</h4>
@@ -135,6 +137,20 @@ export default class StatisticsView extends SmartView {
 
   get template() {
     return createStatisticsTemplate(this._data);
+  }
+
+  updateStatsData = (update, justDataUpdating) => {
+    if (!update) {
+      return;
+    }
+
+    this._data = {...this._data, ...update};
+
+    if (justDataUpdating) {
+      return;
+    }
+
+    this.updateElement();
   }
 
   removeElement = () => {
