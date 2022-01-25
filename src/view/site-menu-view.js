@@ -5,9 +5,9 @@ import SmartView from './smart-view';
 const createSiteMenuTemplate = (filter, currentFilterType, menuType) => {
   const {type, name, count, caption} = filter;
   if (type ==='all') {
-    return `<a href="#${ name }" class="main-navigation__item ${ currentFilterType === type&menuType === MenuItem.MOVIES ? 'main-navigation__item--active':''}" data-type=${ type }>${ caption }</a>`;
+    return `<a href="#${ name }" class="main-navigation__item ${ currentFilterType === type&&menuType === MenuItem.MOVIES ? 'main-navigation__item--active':''}" data-type=${ type }>${ caption }</a>`;
   }
-  return (`<a href="#${ name }" class="main-navigation__item ${ currentFilterType === type&menuType === MenuItem.MOVIES ? 'main-navigation__item--active':''}" data-type=${ type }>${ caption } <span class="main-navigation__item-count">${ count }</span></a>`);
+  return (`<a href="#${ name }" class="main-navigation__item ${ currentFilterType === type&&menuType === MenuItem.MOVIES ? 'main-navigation__item--active':''}" data-type=${ type }>${ caption } <span class="main-navigation__item-count">${ count }</span></a>`);
 };
 
 const createFilterTemplate = (filterItems, currentFilterType, menuType) => {
