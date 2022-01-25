@@ -98,6 +98,7 @@ export default class FilterPresenter {
             this.#moviesListPresenter.destroy();
             remove(this.#statsComponent);
             render (this.#filterContainer, this.#statsComponent, RenderPosition.BEFOREEND);
+            this.#statsComponent.restoreHandlers();
             break;
         }
       };
