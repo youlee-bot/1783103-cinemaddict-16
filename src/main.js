@@ -8,6 +8,7 @@ import FilterPresenter from './presenter/filter-presenter';
 const mainTag = document.querySelector('.main');
 
 const filterModel = new FilterModel();
+
 const moviesModel = new MoviesModel();
 moviesModel.movies = readyContent;
 
@@ -15,7 +16,8 @@ const commentsModel = new CommentsModel();
 commentsModel.comments = readyComments;
 
 const moviesListPresenter = new MovieListPresenter(mainTag, moviesModel, commentsModel, filterModel);
-const filterPresenter = new FilterPresenter(mainTag, filterModel, moviesModel);
+const filterPresenter = new FilterPresenter(mainTag, filterModel, moviesModel, moviesListPresenter);
+
 filterPresenter.init();
 moviesListPresenter.init();
 

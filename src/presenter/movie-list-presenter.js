@@ -19,6 +19,9 @@ export default class MovieListPresenter {
   #filterType = FilterType.ALL;
   #boardComponent =  new BoardView();
   #moreButtonComponent = new ButtonView();
+  #ratingComponent = new RatingView();
+  #moviesCounterComponent = null;
+
   #sortComponent = null;
   #SingleMoviePresenter = new Map();
 
@@ -35,8 +38,6 @@ export default class MovieListPresenter {
     this.#moviesModel = movies;
     this.#commentsModel = comments;
     this.#filterModel = filterModel;
-    this.#moviesModel.addObserver(this.#handleModelEvent);
-    this.#filterModel.addObserver(this.#handleModelEvent);
   }
 
   get movies () {
@@ -67,7 +68,8 @@ export default class MovieListPresenter {
   }
 
   init = (reinit=false) => {
-
+    this.#moviesModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
     render (this.#boardContainer, this.#boardComponent, RenderPosition.BEFOREEND);
     this.#filmListContainer = BoardView.getBoardContainerTag();
     this.#filmListTag = BoardView.getFilmListTag();
@@ -87,6 +89,19 @@ export default class MovieListPresenter {
     this.#renderTopCommented();
     this.#renderTopRated();
     this.#renderSort();
+  }
+
+  destroy = () => {
+    this.#clearBoard();
+    this.#moviesModel.removeObserver(this.#handleModelEvent);
+    this.#filterModel.removeObserver(this.#handleModelEvent);
+  }
+
+  #clearBoard = () => {
+    this.#SingleMoviePresenter.forEach((presenter) => presenter.destroy());
+    this.#SingleMoviePresenter.clear();
+    remove(this.#boardComponent);
+    remove(this.#moviesCounterComponent);
   }
 
   #handleSortTypeChange = (sortType) => {
@@ -126,15 +141,10 @@ export default class MovieListPresenter {
     this.#SingleMoviePresenter.set(movieItem.id, MoviePresenter);
   }
 
-  #clearBoard = () => {
-    this.#SingleMoviePresenter.forEach((presenter) => presenter.destroy());
-    this.#SingleMoviePresenter.clear();
-    remove(this.#boardComponent);
-  }
 
   #renderRating = () => {
     const headerTag = document.querySelector('.header');
-    render (headerTag, new RatingView(), RenderPosition.BEFOREEND);
+    render (headerTag, this.#ratingComponent, RenderPosition.BEFOREEND);
   }
 
   #renderShowMoreButton = () => {
@@ -167,7 +177,8 @@ export default class MovieListPresenter {
 
   #renderMoviesCounter = () => {
     const footerTag = BoardView.getFooterTag();
-    render (footerTag, new MoviesView(this.#moviesModel.movies.length), RenderPosition.BEFOREEND);
+    this.#moviesCounterComponent = new MoviesView(this.#moviesModel.movies.length);
+    render (footerTag, this.#moviesCounterComponent, RenderPosition.BEFOREEND);
   }
 
   #handleViewAction = (actionType, updateType, update) => {

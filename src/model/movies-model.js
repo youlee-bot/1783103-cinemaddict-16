@@ -11,6 +11,10 @@ export default class MoviesModel extends AbstractObservable {
     return this.#movies;
   }
 
+  get watchedMovies() {
+    return this.movies.filter((movie) => movie.userDetails.alreadyWatched);
+  }
+
   updateMovie = (updateType, update) => {
     const index = this.#movies.findIndex((movie) => movie.id === update.id);
 

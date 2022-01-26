@@ -23,18 +23,6 @@ export const generateRandomUniqueArray = (incomingArray, numberOfElement) => {
   return outputArray;
 };
 
-export const minsToHours = (mins) => {
-  const hours = (mins / 60);
-  const resultHours = Math.floor(hours);
-  const minutes = (hours - resultHours) * 60;
-  const resultMinutes = Math.round(minutes);
-  if (resultHours === 0) {
-    return `${resultMinutes  }m`;
-  } else {
-    return `${resultHours  }h ${  resultMinutes  }m`;
-  }
-};
-
 export const generateDate = (from) => {
   const fromMilli = dayjs(from);
   const max = dayjs() - fromMilli;

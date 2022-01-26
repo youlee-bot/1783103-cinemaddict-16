@@ -16,6 +16,10 @@ export default class CommentsModel extends AbstractObservable {
     this._notify(updateType, update);
   }
 
+  reInit = (updateType, update) => {
+    this._notify(updateType, update);
+  }
+
   deleteComment = (updateType, update) => {
     const index = this.#comments.findIndex((comment) => (comment.comment === update.comment)&(comment.date === comment.date));
 

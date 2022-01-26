@@ -11,6 +11,7 @@ export default class SingleMoviePresenter {
   #commentsModel = null;
   #moviesModel = null;
   #bodyTag = null;
+  #popUpPresenter = null;
 
 
   constructor (bodyTag, filmListContainer, commentsModel, moviesModel, changedata) {
@@ -57,7 +58,7 @@ export default class SingleMoviePresenter {
   };
 
   #showPopup = (movieItem) => {
-    const popUpPresenter = new PopUpPresenter (this.#bodyTag, this.#moviesModel, this.#commentsModel, movieItem, this.#changeData);
-    popUpPresenter.init();
+    this.#popUpPresenter = new PopUpPresenter (this.#bodyTag, this.#moviesModel, this.#commentsModel, movieItem, this.#changeData);
+    this.#popUpPresenter.init();
   }
 }
