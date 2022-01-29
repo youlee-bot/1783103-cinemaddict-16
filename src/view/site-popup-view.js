@@ -88,7 +88,7 @@ const createPopupTemplate = (movieToShow, comments) => {
 
     <div class="film-details__bottom-container">
       <section class="film-details__comments-wrap">
-        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${ movieToShow.comments }</span></h3>
+        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${ movieToShow.commentsIds.length }</span></h3>
 
         <ul class="film-details__comments-list">
         </ul>
@@ -136,14 +136,16 @@ export default class PopupView extends SmartView{
   totalComments = null;
   scrollPosition = 0;
   #commentsElements = null;
+  removeObservers = null;
 
-  constructor (movieToShow, comments) {
+  constructor (movieToShow, comments, removeObservers) {
     super();
     this.movie = movieToShow;
     this._data = this.parseCommentToData(comments);
     this.restoreHandlers();
     this.renderComments();
     this.setEscapeHandler();
+    this.removeObservers = removeObservers;
   }
 
   get template () {
@@ -159,9 +161,7 @@ export default class PopupView extends SmartView{
   renderComments = () => {
     const commentsArea = this.element.querySelector('.film-details__comments-list');
     this.#commentsElements.forEach((comment) => {
-      if (comment.content.movieId>=0) {
-        render(commentsArea, comment, RenderPosition.AFTERBEGIN);
-      }
+      render(commentsArea, comment, RenderPosition.AFTERBEGIN);
     });
   }
 
@@ -251,6 +251,7 @@ export default class PopupView extends SmartView{
       this._callback?.watchlist();
     } else if (clickedElement.classList.contains ('film-details__close-btn')) {
       this._callback?.close();
+      this.removeObservers();
     } else if (clickedElement.getAttribute('alt') === 'emoji') {
       this.parseEmotion(clickedElement);
       this.updateData((this._data.length-1),'emotion',this.emotion, false);
@@ -263,7 +264,7 @@ export default class PopupView extends SmartView{
   }
 
   #submitHandler = (evt) => {
-    if (evt.key === 'Enter') {
+    if ((evt.ctrlKey) && ((evt.keyCode == 0xA)||(evt.keyCode == 0xD))) {
       evt.preventDefault();
       this._callback?.submit();
     }

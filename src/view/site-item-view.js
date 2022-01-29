@@ -1,4 +1,3 @@
-import { genresWrapSpan } from '../site-utils';
 import dayjs from 'dayjs';
 import { minsToHours } from '../site-utils';
 import AbstractView from './abstract-view';
@@ -13,11 +12,11 @@ const createItemTemplate = (movie) =>  {
     <p class="film-card__info">
       <span class="film-card__year">${ dayjs(movie.release.date).format('YYYY') }</span>
       <span class="film-card__duration">${ minsToHours(movie.runtime) }</span>
-      <span class="film-card__genre">${ genresWrapSpan(movie.genre) }</span>
+      <span class="film-card__genre"><span class="film-details__genre">${ (movie.genre[0]) }</span></span>
     </p>
     <img src="./${ movie.poster }" alt="" class="film-card__poster">
     <p class="film-card__description">${ movie.description }</p>
-    <span class="film-card__comments">${ movie.comments } comments</span>
+    <span class="film-card__comments">${ movie.commentsIds.length } comments</span>
   </a>
   <div class="film-card__controls">
     <button class="film-card__controls-item film-card__controls-item--add-to-watchlist ${ activeButton(movie.userDetails.watchlist) }" type="button">Add to watchlist</button>

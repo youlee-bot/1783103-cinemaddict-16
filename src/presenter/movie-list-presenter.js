@@ -10,6 +10,7 @@ import NoContent from '../view/site-no-content';
 import { sortByField, sortByDate } from './utils';
 import { UserAction, UpdateType, SortType, FilterType, noContenTexts } from '../const';
 import { filter } from '../site-utils';
+import LoadingView from '../view/site-loading-view';
 
 export default class MovieListPresenter {
   #boardContainer = null;
@@ -20,6 +21,7 @@ export default class MovieListPresenter {
   #boardComponent =  new BoardView();
   #moreButtonComponent = new ButtonView();
   #ratingComponent = new RatingView();
+  #loadingComponent = new LoadingView();
   #moviesCounterComponent = null;
 
   #sortComponent = null;
@@ -32,6 +34,8 @@ export default class MovieListPresenter {
   #commentsModel = null;
   #filterModel = null;
   #bodyTag = null;
+
+  #isLoading = true;
 
   constructor (movieList, movies, comments, filterModel) {
     this.#boardContainer = movieList;
@@ -67,9 +71,13 @@ export default class MovieListPresenter {
     return topRated.sort(sortByField('totalRating'));
   }
 
-  init = (reinit=false) => {
+  init = () => {
     this.#moviesModel.addObserver(this.#handleModelEvent);
     this.#filterModel.addObserver(this.#handleModelEvent);
+    if (this.#isLoading) {
+      render(this.#boardContainer, this.#loadingComponent, RenderPosition.BEFOREEND);
+      return;
+    }
     render (this.#boardContainer, this.#boardComponent, RenderPosition.BEFOREEND);
     this.#filmListContainer = BoardView.getBoardContainerTag();
     this.#filmListTag = BoardView.getFilmListTag();
@@ -79,10 +87,8 @@ export default class MovieListPresenter {
       return;
     }
 
-    if (!reinit) {
-      this.#renderMoviesCounter();
-      this.#renderRating();
-    }
+    this.#renderMoviesCounter();
+    this.#renderRating();
 
     this.#renderMovieItems(0, this.#displayedMovieCards);
 
@@ -192,12 +198,26 @@ export default class MovieListPresenter {
   #handleModelEvent = (updateType, data) => {
     switch (updateType) {
       case UpdateType.PATCH:
-        this.#SingleMoviePresenter.get(data.id).init(data);
+        this.#clearBoard();
+        this.init(true);
         break;
       case UpdateType.MAJOR:
         this.#clearBoard();
         this.#displayedMovieCards = 5;
         this.#currentSortType = SortType.DEFAULT;
+        this.init(true);
+        break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#clearBoard();
+        this.#displayedMovieCards = 5;
+        this.#currentSortType = SortType.DEFAULT;
+        this.init(true);
+        break;
+      case UpdateType.MINOR:
+        this.#clearBoard();
+        this.#displayedMovieCards = 5;
         this.init(true);
         break;
     }

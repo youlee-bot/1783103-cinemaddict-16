@@ -6,6 +6,7 @@ import { render, remove } from '../render';
 import { RenderPosition } from '../render';
 import dayjs from 'dayjs';
 import he from 'he';
+import { nanoid } from 'nanoid';
 
 export default class PopUpPresenter {
   #movie = null;
@@ -16,6 +17,8 @@ export default class PopUpPresenter {
   #comments = null;
   #commentComponents = new Set();
   #changeData = null;
+  #isLoading = true;
+  #lastAddedComment = null;
 
   constructor (bodyTag, moviesModel, commentsModel, movie, changeData) {
     this.#bodyTag = bodyTag;
@@ -35,103 +38,124 @@ export default class PopUpPresenter {
     this.#moviesModel.addObserver(this.#changeData);
     this.#moviesModel.addObserver(this.#handleMovieModelEvent);
 
-    if (reInit) {
-      this.#prevPopUp.removeElement();
-      this.#commentComponents = new Set();
+
+    if (this.#isLoading) {
+      this.#commentsModel.loadComments(this.#movie.id);
     } else {
       this.#comments = this.#commentsModel.comments;
-    }
 
-    this.#currentMovieComments(this.#comments);
-    this.#prevPopUp = new PopupView(this.movie, this.#commentComponents);
 
-    this.#controlsSetHandlers(this.#prevPopUp);
-    this.#prevPopUp.setSubmitCallback(()=>{
-      if (this.#prevPopUp.commentText&&this.#prevPopUp.emotion) {
-
-        this.#handleViewAction(UserAction.ADD_COMMENT, UpdateType.MAJOR,
-          {
-            movieId: this.movie.id,
-            author: 'admin',
-            date:dayjs(),
-            emotion: this.#prevPopUp.emotion,
-            comment: he.encode(this.#prevPopUp.commentText),
-          }
-        );
-        this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, comments: this.movie.comments+1,});
+      if (reInit) {
+        if (this.#prevPopUp) {
+          this.#prevPopUp.removeElement();
+        }
+        this.#commentComponents = new Set();
       }
-    });
-    this.#prevPopUp.setCloseCallback(()=>this.#prevPopUp.removeElement());
-    this.#bodyTag.classList.add('hide-overflow');
 
-    if(PopupView.isOpenPoupView()) {
+      this.#currentMovieComments(this.#comments);
+      this.#prevPopUp = new PopupView(this.movie, this.#commentComponents, this.removeObservers);
+
+      this.#controlsSetHandlers(this.#prevPopUp);
+      this.#prevPopUp.setSubmitCallback(()=>{
+        if (this.#prevPopUp.commentText&&this.#prevPopUp.emotion) {
+          this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, comments: this.movie.comments+1,});
+          this.#handleViewAction(UserAction.ADD_COMMENT, UpdateType.MAJOR,
+            {
+              movieId: this.movie.id,
+              author: 'Movie Buff',
+              date:dayjs(),
+              emotion: this.#prevPopUp.emotion,
+              comment: he.encode(this.#prevPopUp.commentText),
+            }
+          );
+        }
+      });
+      this.#prevPopUp.setCloseCallback(()=>this.#prevPopUp.removeElement());
+      this.#bodyTag.classList.add('hide-overflow');
+      if(PopupView.isOpenPoupView()) {
       return;
     }
-
-    render (this.#bodyTag, this.#prevPopUp, RenderPosition.BEFOREEND);
+      render (this.#bodyTag, this.#prevPopUp, RenderPosition.BEFOREEND);
+    }
   }
 
   destroy = () => {
+    this.removeObservers();
+    remove(this.#prevPopUp);
+  }
+
+  removeObservers = () => {
     this.#commentsModel.removeObserver(this.#handleModelEvent);
     this.#moviesModel.removeObserver(this.#changeData);
-    this.#moviesModel.removeObserver(this.#handleMovieModelEvent);
-    remove(this.#prevPopUp);
+    //this.#moviesModel.removeObserver(this.#handleMovieModelEvent);
   }
 
   #controlsSetHandlers = (component) => {
     component.setFavoriteCallback (()=>{
       this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, userDetails:{...this.movie.userDetails, favorite: !this.movie.userDetails.favorite}});
-      this.#handlePopUpViewAction(UserAction.REINIT, UpdateType.PATCH,{});
     });
 
     component.setWatchCallback (()=>{
       this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, userDetails:{...this.movie.userDetails, alreadyWatched: !this.movie.userDetails.alreadyWatched}});
-      this.#handlePopUpViewAction(UserAction.REINIT, UpdateType.PATCH,{});
     });
 
     component.setWatchlistCallback (()=>{
       this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, userDetails:{...this.movie.userDetails, watchlist: !this.movie.userDetails.watchlist}});
-      this.#handlePopUpViewAction(UserAction.REINIT, UpdateType.PATCH,{});
     });
   };
 
   #currentMovieComments = (comments) => {
     const movieComments = [];
-    for (const index of comments) {
-      if (index.movieId===this.movie.id) {
+    if (!this.#isLoading) {
+      for (const index of comments) {
         movieComments.push(index);
         this.#commentComponents.add(new CommentView(index));
       }
-    }
-    this.#commentComponents.forEach((commentComponent) => {
-      commentComponent.setDeleteCallback(()=>{
-        commentComponent.removeElement();
-
-        this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, comments: this.movie.comments-1,});
-        this.#handleViewAction(UserAction.DELETE_COMMENT, UpdateType.MINOR, commentComponent.content);
+      this.#commentComponents.forEach((commentComponent) => {
+        commentComponent.setDeleteCallback(()=>{
+          commentComponent.removeElement();
+          this.#changeData(UserAction.DELETE_COMMENT, UpdateType.PATCH, {...commentComponent.content, movieId:this.#movie.id,});
+          this.#handleViewAction(UserAction.DELETE_COMMENT, UpdateType.MINOR, {...commentComponent.content, movieId:this.#movie.id,});
+        });
       });
-    });
-    return movieComments;
+      return movieComments;
+    }
   }
 
   #handleViewAction = (actionType, updateType, update) => {
+
     switch (actionType) {
       case UserAction.ADD_COMMENT:
-        this.#moviesModel.addComment(updateType, update);
-        this.#commentsModel.addComment(updateType, update);
+        console.log(update);
+        if (this.#lastAddedComment!==update) {
+          const newCommentId = nanoid();
+          this.#movie.commentsIds.push(newCommentId);
+          this.#moviesModel.updateMovie(updateType, this.#movie);
+          this.#commentsModel.addComment(updateType, {...update, id:newCommentId,});
+          this.#lastAddedComment = update;
+        }
+
         break;
       case UserAction.DELETE_COMMENT:
         this.#commentsModel.deleteComment(updateType, update);
-        this.#moviesModel.deleteComment(updateType, update);
+        this.#movie.commentsIds = this.#movie.commentsIds.filter((commentId) => commentId!==update.id);
+        this.#moviesModel.updateMovie(updateType, this.#movie);
         break;
     }
   }
 
   #handleModelEvent = (updateType, data) => {
+    console.log(updateType);
     switch (updateType) {
-      case UpdateType.MINOR:
-        this.#comments = this.#commentsModel.comments;
+      case UpdateType.INIT:
+        this.#isLoading=false;
         this.init(true);
+        this.#isLoading=true;
+        break;
+      case UpdateType.MINOR:
+        this.#isLoading=false;
+        this.init(true);
+        this.#isLoading=true;
         break;
       case UpdateType.MAJOR:
         this.#comments = [data, ...this.#comments];
@@ -140,19 +164,10 @@ export default class PopUpPresenter {
     }
   }
 
-  #handlePopUpViewAction = (actionType, updateType, update) => {
-    switch (actionType) {
-      case UserAction.REINIT:
-        this.#commentsModel.reInit(updateType, update);
-        break;
-    }
-  }
-
   #handleMovieModelEvent = (updateType) => {
     switch (updateType) {
       case UpdateType.PATCH:
         this.init(true);
-        this.#comments = this.#commentsModel.comments;
         break;
     }
   }
