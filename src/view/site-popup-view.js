@@ -19,7 +19,7 @@ const createPopupTemplate = (movieToShow, comments) => {
   };
 
   return (`<section class="film-details">
-  <form class="film-details__inner" action="" method="get">
+  <form class="film-details__inner" action="" method="get" disabled>
     <div class="film-details__top-container">
       <div class="film-details__close">
         <button class="film-details__close-btn" type="button">close</button>
@@ -225,7 +225,8 @@ export default class PopupView extends SmartView{
 
     return ([...arrayOfComments, {
       emotion: this.emotion,
-      comment: this.commentText}]);
+      comment: this.commentText,
+      isSubmitting: false,}]);
   }
 
   #escapeHandler = (evt) => {

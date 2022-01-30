@@ -1,7 +1,6 @@
 import ItemView from '../view/site-item-view';
 import { UserAction, UpdateType } from '../const';
 import { remove, render, RenderPosition, replace } from '../render';
-import PopUpPresenter from './popup-presenter';
 import CommentView from '../view/site-comment-view';
 import PopupView from '../view/site-popup-view';
 import dayjs from 'dayjs';
@@ -17,8 +16,6 @@ export default class SingleMoviePresenter {
   #moviesModel = null;
   #bodyTag = null;
   #isLoading = true;
-
-  #popUpPresenter = null;
 
   #commentComponents = null;
 
@@ -94,9 +91,10 @@ export default class SingleMoviePresenter {
 
     this.#currentMovieComments(comments);
     this.#prevPopUp = new PopupView(this.movie, this.#commentComponents);
-    this.#setHandlersForActions();
+
     render (this.#bodyTag, this.#prevPopUp, RenderPosition.BEFOREEND);
     this.#controlsSetHandlers(this.#prevPopUp);
+    this.#setHandlersForActions();
 
   }
 
