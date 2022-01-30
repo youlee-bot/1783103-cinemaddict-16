@@ -19,6 +19,7 @@ export default class PopUpPresenter {
   #changeData = null;
   #isLoading = true;
   #lastAddedComment = null;
+  #allHandlers = new Set();
 
   constructor (bodyTag, moviesModel, commentsModel, movie, changeData) {
     this.#bodyTag = bodyTag;
@@ -34,6 +35,9 @@ export default class PopUpPresenter {
   }
 
   init (reInit=false) {
+    if (!reInit) {
+
+    }
     this.#commentsModel.addObserver(this.#handleModelEvent);
     this.#moviesModel.addObserver(this.#changeData);
     this.#moviesModel.addObserver(this.#handleMovieModelEvent);
@@ -53,9 +57,28 @@ export default class PopUpPresenter {
       }
 
       this.#currentMovieComments(this.#comments);
-      this.#prevPopUp = new PopupView(this.movie, this.#commentComponents, this.removeObservers);
+      this.#prevPopUp = new PopupView(this.movie, this.#commentComponents, this.removeObservers, this.#setHandlersForActions);
 
-      this.#controlsSetHandlers(this.#prevPopUp);
+      this.#allHandlers.add(this.#setHandlersForActions);
+      console.log(this.#allHandlers);
+
+    this.#controlsSetHandlers(this.#prevPopUp);
+    this.#prevPopUp.setCloseCallback(()=>this.#prevPopUp.removeElement());
+
+      this.#bodyTag.classList.add('hide-overflow');
+      if(PopupView.isOpenPoupView()) {
+        return;
+      }
+      render (this.#bodyTag, this.#prevPopUp, RenderPosition.BEFOREEND);
+    }
+  }
+
+  destroy = () => {
+    this.removeObservers();
+    remove(this.#prevPopUp);
+  }
+
+  #setHandlersForActions = () => {
       this.#prevPopUp.setSubmitCallback(()=>{
         if (this.#prevPopUp.commentText&&this.#prevPopUp.emotion) {
           this.#changeData(UserAction.UPDATE_MOVIE, UpdateType.PATCH, {...this.movie, comments: this.movie.comments+1,});
@@ -70,18 +93,6 @@ export default class PopUpPresenter {
           );
         }
       });
-      this.#prevPopUp.setCloseCallback(()=>this.#prevPopUp.removeElement());
-      this.#bodyTag.classList.add('hide-overflow');
-      if(PopupView.isOpenPoupView()) {
-      return;
-    }
-      render (this.#bodyTag, this.#prevPopUp, RenderPosition.BEFOREEND);
-    }
-  }
-
-  destroy = () => {
-    this.removeObservers();
-    remove(this.#prevPopUp);
   }
 
   removeObservers = () => {
@@ -126,15 +137,11 @@ export default class PopUpPresenter {
 
     switch (actionType) {
       case UserAction.ADD_COMMENT:
-        console.log(update);
-        if (this.#lastAddedComment!==update) {
-          const newCommentId = nanoid();
-          this.#movie.commentsIds.push(newCommentId);
-          this.#moviesModel.updateMovie(updateType, this.#movie);
-          this.#commentsModel.addComment(updateType, {...update, id:newCommentId,});
-          this.#lastAddedComment = update;
-        }
-
+        const newCommentId = nanoid();
+        this.#movie.commentsIds.push(newCommentId);
+        this.#moviesModel.updateMovie(updateType, this.#movie);
+        this.#commentsModel.addComment(updateType, {...update, id:newCommentId,});
+        this.#lastAddedComment = update;
         break;
       case UserAction.DELETE_COMMENT:
         this.#commentsModel.deleteComment(updateType, update);
@@ -148,6 +155,7 @@ export default class PopUpPresenter {
     console.log(updateType);
     switch (updateType) {
       case UpdateType.INIT:
+        console.log('reinit');
         this.#isLoading=false;
         this.init(true);
         this.#isLoading=true;

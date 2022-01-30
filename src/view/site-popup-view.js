@@ -136,16 +136,16 @@ export default class PopupView extends SmartView{
   totalComments = null;
   scrollPosition = 0;
   #commentsElements = null;
-  removeObservers = null;
 
-  constructor (movieToShow, comments, removeObservers) {
+  constructor (movieToShow, comments, SubmitCallback) {
     super();
     this.movie = movieToShow;
+    this.comments = null;
     this._data = this.parseCommentToData(comments);
     this.restoreHandlers();
     this.renderComments();
     this.setEscapeHandler();
-    this.removeObservers = removeObservers;
+    this.setSubmitCallback(SubmitCallback);
   }
 
   get template () {
@@ -251,7 +251,6 @@ export default class PopupView extends SmartView{
       this._callback?.watchlist();
     } else if (clickedElement.classList.contains ('film-details__close-btn')) {
       this._callback?.close();
-      this.removeObservers();
     } else if (clickedElement.getAttribute('alt') === 'emoji') {
       this.parseEmotion(clickedElement);
       this.updateData((this._data.length-1),'emotion',this.emotion, false);

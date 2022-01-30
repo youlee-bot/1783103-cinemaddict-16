@@ -71,28 +71,34 @@ export default class ApiService {
   }
 
   #adaptMovieToServer = (movie) => {
+
     const adaptedMovie = {
-      id: movie['id'],
-      film_info: {...movie,
-        alternative_title: movie['alternativeTitle'],
-        total_rating: movie['totalRating'],
-        age_rating: movie['ageRating'],
-        release: {
-          date: movie['release']['date'].toISOString(),
-          release_country: movie['release']['releaseCountry']
+      'id': movie.id,
+      'film_info': {
+        'title': movie.title,
+        'alternative_title': movie.alternativeTitle,
+        'total_rating': movie.totalRating,
+        'poster': movie.poster,
+        'age_rating': movie.ageRating,
+        'director': movie.director,
+        'writers': [...movie.writers],
+        'actors': [...movie.actors],
+        'release': {
+          'date': movie.release.date,
+          'release_country': movie.release.releaseCountry,
         },
+        'runtime': movie.runtime,
+        'genre': [...movie.genre],
+        'description': movie.description,
       },
-      user_details: {... movie['userDetails'],
-        already_watched: movie['userDetails']['alreadyWatched'],
-        watching_date: movie['userDetails']['watchingDate'],
+      'user_details': {
+        'watchlist': movie.userDetails.watchlist,
+        'already_watched': movie.userDetails.alreadyWatched,
+        'watching_date': movie.userDetails.watchingDate,
+        'favorite': movie.userDetails.favorite,
       },
-      comments: movie['commentsIds'],
+      'comments': movie.commentsIds,
     };
-
-    delete adaptedMovie['film_info']['alternativeTitle'];
-    delete adaptedMovie['film_info']['totalRating'];
-    delete adaptedMovie['film_info']['ageRating'];
-
     return adaptedMovie;
   }
 

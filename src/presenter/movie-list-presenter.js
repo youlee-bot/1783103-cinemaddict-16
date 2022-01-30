@@ -72,9 +72,9 @@ export default class MovieListPresenter {
   }
 
   init = () => {
-    this.#moviesModel.addObserver(this.#handleModelEvent);
-    this.#filterModel.addObserver(this.#handleModelEvent);
     if (this.#isLoading) {
+      this.#moviesModel.addObserver(this.#handleModelEvent);
+      this.#filterModel.addObserver(this.#handleModelEvent);
       render(this.#boardContainer, this.#loadingComponent, RenderPosition.BEFOREEND);
       return;
     }
@@ -142,8 +142,8 @@ export default class MovieListPresenter {
     if (!movieItem) {
       return;
     }
-    const MoviePresenter = new SingleMoviePresenter(this.#bodyTag, container, this.#commentsModel,this.#moviesModel, this.#handleViewAction);
-    MoviePresenter.init(movieItem);
+    const MoviePresenter = new SingleMoviePresenter(this.#bodyTag, container, this.#commentsModel,this.#moviesModel, this.#handleViewAction, movieItem.id);
+    MoviePresenter.init(movieItem.id);
     this.#SingleMoviePresenter.set(movieItem.id, MoviePresenter);
   }
 
@@ -187,19 +187,42 @@ export default class MovieListPresenter {
     render (footerTag, this.#moviesCounterComponent, RenderPosition.BEFOREEND);
   }
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = async(actionType, updateType, update) => {
+    console.log(actionType, updateType, update);
     switch (actionType) {
       case UserAction.UPDATE_MOVIE:
-        this.#moviesModel.updateMovie(updateType, update);
+        try {
+          await
+          this.#moviesModel.updateMovie(updateType, update);
+        } catch(err) {
+          console.log(err);
+        }
+        break;
+      case UserAction.ADD_COMMENT:
+        //  const newCommentId = nanoid();
+        //  this.#movie.commentsIds.push(newCommentId);
+        try {
+          await this.#commentsModel.addComment(updateType, update);
+        } catch(err) {
+          console.log(err);
+        }
+        break;
+      case UserAction.DELETE_COMMENT:
+        try {
+          await
+          this.#commentsModel.deleteComment(updateType, update);
+        } catch(err) {
+          console.log(err);
+        }
         break;
     }
   }
 
   #handleModelEvent = (updateType, data) => {
+    console.log(updateType, data);
     switch (updateType) {
       case UpdateType.PATCH:
-        this.#clearBoard();
-        this.init(true);
+        this.#SingleMoviePresenter.get(data.id).init(data.id);
         break;
       case UpdateType.MAJOR:
         this.#clearBoard();

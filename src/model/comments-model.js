@@ -23,14 +23,12 @@ export default class CommentsModel extends AbstractObservable {
     let comments;
     try {
       comments = await this.#apiService.getComments(movieId);
-
       this.#comments = comments.map((comment)=>({...comment, movieId:movieId,}));
 
     } catch (err) {
       comments = [];
     }
 
-    this._notify(UpdateType.INIT);
     return this.#comments;
   }
 
