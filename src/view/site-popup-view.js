@@ -238,11 +238,12 @@ export default class PopupView extends SmartView{
 
   setStateDisable = () => {
     this.updateData((this._data.length-1),'isDisabled',true, false);
+    return(this._data);
   }
 
   setStateEnable = () => {
     this.updateData((this._data.length-1),'isDisabled',false, false);
-    console.log(this._data);
+    return(this._data);
   }
 
   shake() {
