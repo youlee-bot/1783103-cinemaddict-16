@@ -6,7 +6,6 @@ import { render, remove } from '../render';
 import { RenderPosition } from '../render';
 import dayjs from 'dayjs';
 import he from 'he';
-import { nanoid } from 'nanoid';
 
 export default class PopUpPresenter {
   #movie = null;
@@ -46,7 +45,6 @@ export default class PopUpPresenter {
           date: dayjs(),
           author: 'Movie Buff',
           movieId: this.movie.id,
-          id: nanoid()
         };
         this.#handleViewAction(UserAction.ADD_COMMENT, UpdateType.MAJOR, newComment);
       }
@@ -100,10 +98,10 @@ export default class PopUpPresenter {
         this.#movie.commentsIds.push(update.id);
         try {
           await this.#commentsModel.addComment(updateType, update);
+          this.setViewStateEnabled();
         } catch(err) {
           this.setShaking();
         }
-        this.setViewStateEnabled();
         break;
       }
       case UserAction.DELETE_COMMENT:
