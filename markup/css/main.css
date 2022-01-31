@@ -37,6 +37,32 @@
   src: local('Open Sans ExtraBold'), local('OpenSans-ExtraBold'), url('../fonts/OpenSans-ExtraBold.woff2') format('woff2');
 }
 
+@keyframes shake {
+  0%,
+  100% {
+      transform: translateX(0);
+  }
+
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+      transform: translateX(-5px);
+  }
+
+  20%,
+  40%,
+  60%,
+  80% {
+      transform: translateX(5px);
+  }
+}
+
+.shake {
+  animation: shake 0.6s;
+}
+
 html {
   background: #121213 url('../images/background.png') no-repeat 60% 0;
   display: flex;

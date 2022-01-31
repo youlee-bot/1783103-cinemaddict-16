@@ -4,19 +4,23 @@ import { genresWrapSpan } from '../site-utils';
 import { render, RenderPosition } from '../render';
 import SmartView from './smart-view';
 
+const SHAKE_ANIMATION_TIMEOUT = 600;
+
 const createPopupTemplate = (movieToShow, comments) => {
 
   const genreCounter = () => (movieToShow.genre.length > 1)?'s':'';
 
   const activeButton = (status) => (status)?'film-details__control-button--active':'';
 
+  const lastComment = comments[comments.length-1];
+
   const insertEmoji = () => {
-    const lastComment = comments[comments.length-1];
     if (!lastComment.emotion) {
       return '';
     }
     return `<img src="images/emoji/${ lastComment.emotion }.png" width="55" height="55" alt="emoji-${ lastComment.emotion }"></img>`;
   };
+
 
   return (`<section class="film-details">
   <form class="film-details__inner" action="" method="get">
@@ -88,7 +92,7 @@ const createPopupTemplate = (movieToShow, comments) => {
 
     <div class="film-details__bottom-container">
       <section class="film-details__comments-wrap">
-        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${ movieToShow.comments }</span></h3>
+        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${ movieToShow.commentsIds.length }</span></h3>
 
         <ul class="film-details__comments-list">
         </ul>
@@ -97,7 +101,7 @@ const createPopupTemplate = (movieToShow, comments) => {
           <div class="film-details__add-emoji-label">${ insertEmoji() }</div>
 
           <label class="film-details__comment-label">
-            <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
+            <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment" ${ lastComment.isDisabled ? 'disabled' : ''}></textarea>
           </label>
 
           <div class="film-details__emoji-list">
@@ -136,14 +140,16 @@ export default class PopupView extends SmartView{
   totalComments = null;
   scrollPosition = 0;
   #commentsElements = null;
+  removeObservers = null;
 
-  constructor (movieToShow, comments) {
+  constructor (movieToShow, comments, removeObservers) {
     super();
     this.movie = movieToShow;
     this._data = this.parseCommentToData(comments);
     this.restoreHandlers();
     this.renderComments();
     this.setEscapeHandler();
+    this.removeObservers = removeObservers;
   }
 
   get template () {
@@ -158,10 +164,11 @@ export default class PopupView extends SmartView{
 
   renderComments = () => {
     const commentsArea = this.element.querySelector('.film-details__comments-list');
+    const countsCommentsElement = this.element.querySelector('.film-details__comments-count');
+    commentsArea.innerHTML = '';
+    countsCommentsElement.innerText = this.#commentsElements.size;
     this.#commentsElements.forEach((comment) => {
-      if (comment.content.movieId>=0) {
-        render(commentsArea, comment, RenderPosition.AFTERBEGIN);
-      }
+      render(commentsArea, comment, RenderPosition.AFTERBEGIN);
     });
   }
 
@@ -225,7 +232,25 @@ export default class PopupView extends SmartView{
 
     return ([...arrayOfComments, {
       emotion: this.emotion,
-      comment: this.commentText}]);
+      comment: this.commentText,
+      isDisabled: false, }]);
+  }
+
+  setStateDisable = () => {
+    this.updateData((this._data.length-1),'isDisabled',true, false);
+  }
+
+  setStateEnable = () => {
+    this.updateData((this._data.length-1),'isDisabled',false, false);
+  }
+
+  shake() {
+    const elementToShake = this.element.querySelector('.film-details__add-emoji-label');
+    elementToShake.style.animation = `shake ${SHAKE_ANIMATION_TIMEOUT / 1000}s`;
+    setTimeout(() => {
+      this.element.style.animation = '';
+      this.setStateEnable();
+    }, SHAKE_ANIMATION_TIMEOUT);
   }
 
   #escapeHandler = (evt) => {
@@ -245,12 +270,16 @@ export default class PopupView extends SmartView{
 
     if(clickedElement.classList.contains ('film-details__control-button--favorite')) {
       this._callback?.favorite();
+      clickedElement.classList.toggle('film-details__control-button--active');
     } else if (clickedElement.classList.contains ('film-details__control-button--watched')) {
       this._callback?.watch();
+      clickedElement.classList.toggle('film-details__control-button--active');
     } else if (clickedElement.classList.contains ('film-details__control-button--watchlist')) {
       this._callback?.watchlist();
+      clickedElement.classList.toggle('film-details__control-button--active');
     } else if (clickedElement.classList.contains ('film-details__close-btn')) {
       this._callback?.close();
+      this.removeObservers();
     } else if (clickedElement.getAttribute('alt') === 'emoji') {
       this.parseEmotion(clickedElement);
       this.updateData((this._data.length-1),'emotion',this.emotion, false);
@@ -262,10 +291,23 @@ export default class PopupView extends SmartView{
     this.updateData((this._data.length-1),'comment',this.commentText, true);
   }
 
+  #resetCommentInput = () => {
+    const form = this.element.querySelector('.film-details__inner');
+    form.reset();
+    this.emotion = '';
+    const emojiElement = this.element.querySelector('.film-details__add-emoji-label img');
+    emojiElement?.remove();
+  }
+
   #submitHandler = (evt) => {
-    if (evt.key === 'Enter') {
+    if (evt.ctrlKey && evt.key === 'Enter') {
       evt.preventDefault();
-      this._callback?.submit();
+      const comment = {
+        text: this.commentText,
+        emoji: this.emotion,
+      };
+      this._callback?.submit(comment);
+      this.#resetCommentInput();
     }
   }
 
