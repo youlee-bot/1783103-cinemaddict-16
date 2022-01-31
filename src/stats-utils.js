@@ -45,7 +45,7 @@ export const settingsForChart = (data) => {
     genresCount.push(countGenreMovies(genresToCount.join().split(','),genre));
   });
 
-  return {genres: Array.from(genres), genresCount:genresCount, topGenre: Array.from(genres)[genresCount.indexOf( Math.max.apply(null, genresCount))],};
+  return {genres: Array.from(genres), genresCount:genresCount, topGenre: Array.from(genres)[genresCount.indexOf( Math.max.apply(null, genresCount))]};
 };
 
 export const timeCount = (data) => {
