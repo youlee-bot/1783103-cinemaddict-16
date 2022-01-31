@@ -42,12 +42,11 @@ export default class MoviesModel extends AbstractObservable {
       this.#movies = [...this.#movies.slice(0, index), updatedMovie, ...this.#movies.slice(index + 1),];
       this._notify(updateType, update);
     } catch(err) {
-      throw new Error(err);
+      throw new Error('Can\'t update movie');
     }
   }
 
   #adaptToClient = (movie) => {
-
     const adaptedMovie = {...movie['film_info'],
       id: movie['id'],
       alternativeTitle: movie['film_info']['alternative_title'],

@@ -23,20 +23,22 @@ export default class CommentsModel extends AbstractObservable {
     let comments;
     try {
       comments = await this.#apiService.getComments(movieId);
+
       this.#comments = comments.map((comment)=>({...comment, movieId:movieId,}));
 
     } catch (err) {
       comments = [];
     }
 
+    this._notify(UpdateType.INIT, this.#comments);
     return this.#comments;
   }
 
   addComment = async(updateType, update) => {
     try {
-      const response = await this.#apiService.addComment(update, update.movieId);
-      const updatedMovie = (response);
-      this._notify(updateType, update);
+      const {comments} = await this.#apiService.addComment(update, update.movieId);
+      this.#comments = comments;
+      this._notify(updateType, comments);
     } catch(err) {
       throw new Error(err);
     }
@@ -59,8 +61,7 @@ export default class CommentsModel extends AbstractObservable {
         ...this.#comments.slice(0, index),
         ...this.#comments.slice(index + 1),
       ];
-      delete update.movieId;
-      this._notify(updateType, update);
+      this._notify(updateType, this.#comments);
     } catch(err) {
       throw new Error(err);
     }

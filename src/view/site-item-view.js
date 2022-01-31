@@ -4,6 +4,11 @@ import AbstractView from './abstract-view';
 
 const createItemTemplate = (movie) =>  {
   const activeButton = (status) => (status)?'film-card__controls-item--active':'';
+  const cutDescription = (text) => {
+    let finalText = text.slice(0,139);
+    finalText+='...';
+    return finalText;
+  };
 
   return (`<article class="film-card" data-movie-index="${ movie.id }">
   <a class="film-card__link">
@@ -15,7 +20,7 @@ const createItemTemplate = (movie) =>  {
       <span class="film-card__genre"><span class="film-details__genre">${ (movie.genre[0]) }</span></span>
     </p>
     <img src="./${ movie.poster }" alt="" class="film-card__poster">
-    <p class="film-card__description">${ movie.description }</p>
+    <p class="film-card__description">${ cutDescription(movie.description) }</p>
     <span class="film-card__comments">${ movie.commentsIds.length } comments</span>
   </a>
   <div class="film-card__controls">

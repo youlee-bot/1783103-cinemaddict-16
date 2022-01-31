@@ -1,7 +1,6 @@
 import BoardView from '../view/site-board-view';
 import SortView from '../view/site-sort-view';
 import ButtonView from '../view/site-show-more-button-view';
-import ExtraView from '../view/site-extra-view';
 import MoviesView from '../view/site-movies-counter-view';
 import { render, RenderPosition, remove } from '../render';
 import RatingView from '../view/site-user-rating-view';
@@ -72,9 +71,9 @@ export default class MovieListPresenter {
   }
 
   init = () => {
+    this.#moviesModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
     if (this.#isLoading) {
-      this.#moviesModel.addObserver(this.#handleModelEvent);
-      this.#filterModel.addObserver(this.#handleModelEvent);
       render(this.#boardContainer, this.#loadingComponent, RenderPosition.BEFOREEND);
       return;
     }
@@ -92,8 +91,6 @@ export default class MovieListPresenter {
 
     this.#renderMovieItems(0, this.#displayedMovieCards);
 
-    this.#renderTopCommented();
-    this.#renderTopRated();
     this.#renderSort();
   }
 
@@ -142,8 +139,8 @@ export default class MovieListPresenter {
     if (!movieItem) {
       return;
     }
-    const MoviePresenter = new SingleMoviePresenter(this.#bodyTag, container, this.#commentsModel,this.#moviesModel, this.#handleViewAction, movieItem.id);
-    MoviePresenter.init(movieItem.id);
+    const MoviePresenter = new SingleMoviePresenter(this.#bodyTag, container, this.#commentsModel,this.#moviesModel, this.#handleViewAction);
+    MoviePresenter.init(movieItem);
     this.#SingleMoviePresenter.set(movieItem.id, MoviePresenter);
   }
 
@@ -158,11 +155,11 @@ export default class MovieListPresenter {
     this.#moreButtonComponent.setClickHandler(()=>{
       if (this.movies.length > this.#displayedMovieCards) {
         const hidedMovieCards = this.movies.length - this.#displayedMovieCards;
-        if (hidedMovieCards >= this.#moviesToShowPerStep) {
+        if (hidedMovieCards > this.#moviesToShowPerStep) {
           this.#renderMovieItems(this.#displayedMovieCards - 1, this.#displayedMovieCards-1 + this.#moviesToShowPerStep);
           this.#displayedMovieCards+=this.#moviesToShowPerStep;
         }
-        else if (hidedMovieCards < this.#moviesToShowPerStep) {
+        if (hidedMovieCards <= this.#moviesToShowPerStep) {
           this.#renderMovieItems(this.#displayedMovieCards - 1, this.movies.length - 1);
           this.#displayedMovieCards+=this.movies.length - 1 - this.#displayedMovieCards - 1;
           remove(this.#moreButtonComponent);
@@ -171,58 +168,25 @@ export default class MovieListPresenter {
     });
   }
 
-  #renderTopRated = () => {
-    render (this.#filmListTag, new ExtraView('Top Rated', 'top-rated'), RenderPosition.AFTEREND);
-    this.#renderMovieItems(0,2,this.topRated,ExtraView.getExtraTag('top-rated'));
-  }
-
-  #renderTopCommented = () => {
-    render (this.#filmListTag, new ExtraView('Top Commented', 'top-commented'), RenderPosition.AFTEREND);
-    this.#renderMovieItems(0,2,this.topCommented,ExtraView.getExtraTag('top-commented'));
-  }
-
   #renderMoviesCounter = () => {
     const footerTag = BoardView.getFooterTag();
     this.#moviesCounterComponent = new MoviesView(this.#moviesModel.movies.length);
     render (footerTag, this.#moviesCounterComponent, RenderPosition.BEFOREEND);
   }
 
-  #handleViewAction = async(actionType, updateType, update) => {
-    console.log(actionType, updateType, update);
+  #handleViewAction = (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.UPDATE_MOVIE:
-        try {
-          await
-          this.#moviesModel.updateMovie(updateType, update);
-        } catch(err) {
-          console.log(err);
-        }
-        break;
-      case UserAction.ADD_COMMENT:
-        //  const newCommentId = nanoid();
-        //  this.#movie.commentsIds.push(newCommentId);
-        try {
-          await this.#commentsModel.addComment(updateType, update);
-        } catch(err) {
-          console.log(err);
-        }
-        break;
-      case UserAction.DELETE_COMMENT:
-        try {
-          await
-          this.#commentsModel.deleteComment(updateType, update);
-        } catch(err) {
-          console.log(err);
-        }
+        this.#moviesModel.updateMovie(updateType, update);
         break;
     }
   }
 
-  #handleModelEvent = (updateType, data) => {
-    console.log(updateType, data);
+  #handleModelEvent = (updateType) => {
     switch (updateType) {
       case UpdateType.PATCH:
-        this.#SingleMoviePresenter.get(data.id).init(data.id);
+        this.#clearBoard();
+        this.init(true);
         break;
       case UpdateType.MAJOR:
         this.#clearBoard();
